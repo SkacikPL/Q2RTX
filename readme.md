@@ -1,4 +1,6 @@
 # Personal branch of NVIDIA Quake II RTX
+*Warning: OpenAL Soft is now REQUIRED to run the game in OpenAL audio mode, you can download newest version from here: https://github.com/kcat/openal-soft , to install drop the 64 bit .dll as OpenAL32.dll in q2rtxgame.exe folder*
+
 **Changes made:**
  - Added flashlight (can be used via bind x toggle cl_flashlight)
  - Flare gun does not consume ammo (flares also bounce now)
