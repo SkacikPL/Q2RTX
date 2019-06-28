@@ -1669,6 +1669,7 @@ static void SV_PrepWorldFrame(void)
 // pause if there is only local client on the server
 static inline qboolean check_paused(void)
 {
+
 #if USE_CLIENT
     if (dedicated->integer)
         goto resume;
@@ -1679,11 +1680,11 @@ static inline qboolean check_paused(void)
     if (com_timedemo->integer)
         goto resume;
 
-    if (!LIST_SINGLE(&sv_clientlist))
+    if (!LIST_SINGLE(&sv_clientlist) && !Cvar_VariableInteger("coop"))
         goto resume;
 
 #if USE_MVD_CLIENT
-    if (!LIST_EMPTY(&mvd_gtv_list))
+    if (!LIST_EMPTY(&mvd_gtv_list) && !Cvar_VariableInteger("coop"))
         goto resume;
 #endif
 
