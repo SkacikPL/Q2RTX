@@ -24,6 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "dynamic.h"
 #include <AL/alc.h>
 
+
 #define QALC_IMP \
     QAL(LPALCCREATECONTEXT, alcCreateContext); \
     QAL(LPALCMAKECONTEXTCURRENT, alcMakeContextCurrent); \
@@ -73,6 +74,13 @@ void QAL_Shutdown(void)
         device = NULL;
     }
 
+	if (inputdevice)
+	{
+		qalcCaptureStop(inputdevice);
+		qalcCaptureCloseDevice(inputdevice);
+		inputdevice = NULL;
+	}
+
 #define QAL(type, func)  q##func = NULL
     QALC_IMP
     QAL_IMP
@@ -89,77 +97,105 @@ void QAL_Shutdown(void)
         al_device->flags &= ~CVAR_SOUND;
 }
 
+const int SRATE = 48000;
+const int SSIZE = 2250;
+
+byte *buffer[4500];
+ALint sample;
+
+micsample_t HandleMic(void)
+{
+	micsample_t value;
+
+	qalcGetIntegerv(inputdevice, ALC_CAPTURE_SAMPLES, (ALCsizei)sizeof(ALint), &sample);
+	qalcCaptureSamples(inputdevice, (ALCvoid *)buffer, sample);
+
+	value.sample = sample;
+	value.buffer = buffer;
+
+	return value;
+}
+
 void QALC_PrintExtensions(void)
 {
 	Com_Printf("ALC_EXTENSIONS: %s\n", qalcGetString(device, ALC_EXTENSIONS));
+
+	if (device)
+	{
+		Com_Printf("\n");
+		Com_Printf("Audio device: %s\n", qalcGetString(device, ALC_ALL_DEVICES_SPECIFIER));
+	}
+
+	if (inputdevice)
+		Com_Printf("Audio capture device: %s\n", qalcGetString(inputdevice, ALC_ALL_DEVICES_SPECIFIER));
 }
 
 qboolean QAL_Init(void)
 {
-    al_driver = Cvar_Get("al_driver", LIBAL, 0);
-    al_device = Cvar_Get("al_device", "", 0);
+	al_driver = Cvar_Get("al_driver", LIBAL, 0);
+	al_device = Cvar_Get("al_device", "", 0);
 
-    // don't allow absolute or relative paths
-    FS_SanitizeFilenameVariable(al_driver);
+	// don't allow absolute or relative paths
+	FS_SanitizeFilenameVariable(al_driver);
 
-    Sys_LoadLibrary(al_driver->string, NULL, &handle);
-    if (!handle) {
-        return qfalse;
-    }
+	Sys_LoadLibrary(al_driver->string, NULL, &handle);
+	if (!handle) {
+		return qfalse;
+	}
 
 #define QAL(type, func)  if ((q##func = Sys_GetProcAddress(handle, #func)) == NULL) goto fail;
-    QALC_IMP
-    QAL_IMP
+	QALC_IMP
+		QAL_IMP
 #undef QAL
 
-    device = qalcOpenDevice(al_device->string[0] ? al_device->string : NULL);
-    if (!device) {
-        Com_SetLastError(va("alcOpenDevice(%s) failed", al_device->string));
-        goto fail;
-    }
+		device = qalcOpenDevice(al_device->string[0] ? al_device->string : NULL);
+	if (!device) {
+		Com_SetLastError(va("alcOpenDevice(%s) failed", al_device->string));
+		goto fail;
+	}
 
-    context = qalcCreateContext(device, NULL);
-    if (!context) {
-        Com_SetLastError("alcCreateContext failed");
-        goto fail;
-    }
+	context = qalcCreateContext(device, NULL);
+	if (!context) {
+		Com_SetLastError("alcCreateContext failed");
+		goto fail;
+	}
 
-    if (!qalcMakeContextCurrent(context)) {
-        Com_SetLastError("alcMakeContextCurrent failed");
-        goto fail;
-    }
+	if (!qalcMakeContextCurrent(context)) {
+		Com_SetLastError("alcMakeContextCurrent failed");
+		goto fail;
+	}
 
-    al_driver->flags |= CVAR_SOUND;
-    al_device->flags |= CVAR_SOUND;
+	al_driver->flags |= CVAR_SOUND;
+	al_device->flags |= CVAR_SOUND;
 
 	if (qalcIsExtensionPresent(device, "ALC_EXT_EFX") && strstr(qalGetString(AL_RENDERER), "OpenAL Soft")) {
-				qalGenFilters = qalcGetProcAddress(device, "alGenFilters");
-				qalFilteri = qalcGetProcAddress(device, "alFilteri");
-				qalFilterf = qalcGetProcAddress(device, "alFilterf");
-				qalDeleteFilters = qalcGetProcAddress(device, "alDeleteFilters");
-				qalEffectf = qalcGetProcAddress(device, "alEffectf");
-				qalEffectfv = qalcGetProcAddress(device, "alEffectfv");
-				qalEffecti = qalcGetProcAddress(device, "alEffecti");
-				qalEffectiv = qalcGetProcAddress(device, "alEffectiv");
-				qalGenEffects = qalcGetProcAddress(device, "alGenEffects");
-				qalAuxiliaryEffectSloti = qalcGetProcAddress(device, "alAuxiliaryEffectSloti");
-				qalGenAuxiliaryEffectSlots = qalcGetProcAddress(device, "alGenAuxiliaryEffectSlots");
-				qalDeleteAuxiliaryEffectSlots = qalcGetProcAddress(device, "alDeleteAuxiliaryEffectSlots");
-				qalDeleteEffects = qalcGetProcAddress(device, "alDeleteEffects");
+		qalGenFilters = qalcGetProcAddress(device, "alGenFilters");
+		qalFilteri = qalcGetProcAddress(device, "alFilteri");
+		qalFilterf = qalcGetProcAddress(device, "alFilterf");
+		qalDeleteFilters = qalcGetProcAddress(device, "alDeleteFilters");
+		qalEffectf = qalcGetProcAddress(device, "alEffectf");
+		qalEffectfv = qalcGetProcAddress(device, "alEffectfv");
+		qalEffecti = qalcGetProcAddress(device, "alEffecti");
+		qalEffectiv = qalcGetProcAddress(device, "alEffectiv");
+		qalGenEffects = qalcGetProcAddress(device, "alGenEffects");
+		qalAuxiliaryEffectSloti = qalcGetProcAddress(device, "alAuxiliaryEffectSloti");
+		qalGenAuxiliaryEffectSlots = qalcGetProcAddress(device, "alGenAuxiliaryEffectSlots");
+		qalDeleteAuxiliaryEffectSlots = qalcGetProcAddress(device, "alDeleteAuxiliaryEffectSlots");
+		qalDeleteEffects = qalcGetProcAddress(device, "alDeleteEffects");
 		Com_Printf("OpenAL EFX extensions available.\n");
 	}
 	else {
-				qalGenFilters = NULL;
-				qalFilteri = NULL;
-				qalFilterf = NULL;
-				qalDeleteFilters = NULL;
-				qalEffectf = NULL;
-				qalEffectfv = NULL;
-				qalEffecti = NULL;
-				qalEffectiv = NULL;
-				qalGenEffects = NULL;
-				qalAuxiliaryEffectSloti = NULL;
-				qalGenAuxiliaryEffectSlots = NULL;
+		qalGenFilters = NULL;
+		qalFilteri = NULL;
+		qalFilterf = NULL;
+		qalDeleteFilters = NULL;
+		qalEffectf = NULL;
+		qalEffectfv = NULL;
+		qalEffecti = NULL;
+		qalEffectiv = NULL;
+		qalGenEffects = NULL;
+		qalAuxiliaryEffectSloti = NULL;
+		qalGenAuxiliaryEffectSlots = NULL;
 		Com_Printf("OpenAL EFX extensions NOT available.\n");
 	}
 
@@ -199,7 +235,22 @@ qboolean QAL_Init(void)
 
 		Com_Printf("HRTF preset: %s\n", qalcGetString(device, ALC_HRTF_SPECIFIER_SOFT));
 	}
-			
+
+	if(device)
+		Com_Printf("Detected default audio device: %s\n", qalcGetString(device, ALC_ALL_DEVICES_SPECIFIER));
+
+	inputdevice = qalcCaptureOpenDevice(NULL, SRATE, AL_FORMAT_STEREO16, SSIZE);
+	if (inputdevice)
+	{
+		Com_Printf("Detected sound capture device: %s!\n", qalcGetString(inputdevice, ALC_ALL_DEVICES_SPECIFIER));
+	}
+	else
+	{
+		Com_Printf("Could not detect default sound capture device!\n");
+	}
+
+
+	qalcCaptureStart(inputdevice);
 
     return qtrue;
 
