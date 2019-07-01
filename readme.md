@@ -1,5 +1,5 @@
 # Personal branch of NVIDIA Quake II RTX
-*Warning: OpenAL Soft is now REQUIRED to run the game in OpenAL audio mode, you can download newest version from here: https://github.com/kcat/openal-soft , to install drop the 64 bit .dll as OpenAL32.dll in q2rtxgame.exe folder*
+*Warning: OpenAL Soft is now REQUIRED to run the game in OpenAL audio mode, you can download newest version from here: https://github.com/kcat/openal-soft , to install drop the 64 bit .dll as OpenAL32.dll in q2rtxgame.exe folder (Windows releases provide precompiled binary of newest master brach of OpenAL Soft)*
 
 **Changes made:**
  - Added flashlight (can be used via bind x toggle cl_flashlight)
@@ -10,6 +10,7 @@
  - Support for both Ground Zero and Reckoning expansions via port from Yamagi Quake 2
  - Custom launcher for easy switching between base game and expansions
  - Open AL effects extensions ported from Yamagi Quake 2, enabling low pass filter in water and doppler effect scaling with relative object speed. Also including brand new experimental (and very simplistic) sound occlusion, can be toggled via s_occlusion and scaled via s_occlusion_strength (higher values decrease the effect).Reverb is enabled by default, can be disabled via s_reverb 0. Also by default picks preset automatically out of 7 presets based on surrounding size, this function can be disabled via s_reverb_preset_autopick 0. Presets can be set manually via s_reverb_preset (0-113). (Combine with OpenAL soft for best results and HRTF support https://github.com/kcat/openal-soft )
+ - Voice input from default recording device passed into game and processed with same effects as other ingame sounds, controlled via s_voiceinput 0/1 and s_voiceinput_volume.
 
 
 
