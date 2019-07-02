@@ -378,6 +378,75 @@ SET(HEADERS_ZAERO
 	zaero/savegame/tables/levelfields.h
 )
 
+SET(SRC_ACTION
+	action/acesrc/acebot_ai.c
+	action/acesrc/acebot_cmds.c
+	action/acesrc/acebot_compress.c
+	action/acesrc/acebot_items.c
+	action/acesrc/acebot_movement.c
+	action/acesrc/acebot_nodes.c
+	action/acesrc/acebot_spawn.c
+	action/acesrc/botchat.c
+	action/acesrc/botnav.c
+	action/acesrc/botscan.c
+	action/acesrc/cgf_sfx_fog.c
+	action/acesrc/fogstub.c
+	action/a_cmds.c
+	action/a_doorkick.c
+	action/a_game.c
+	action/a_items.c
+	action/a_menu.c
+	action/a_radio.c
+	action/a_team.c
+	action/cgf_sfx_glass.c
+	action/g_ai.c
+	action/g_chase.c
+	action/g_cmds.c
+	action/g_combat.c
+	action/g_func.c
+	action/g_items.c
+	action/g_main.c
+	action/g_misc.c
+	action/g_monster.c
+	action/g_phys.c
+	action/g_save.c
+	action/g_spawn.c
+	action/g_svcmds.c
+	action/g_target.c
+	action/g_trigger.c
+	action/g_turret.c
+	action/g_utils.c
+	action/g_weapon.c
+	action/m_flash.c
+	action/m_move.c
+	action/m_tank.c
+	action/p_client.c
+	action/p_hud.c
+	action/p_trail.c
+	action/p_view.c
+	action/p_weapon.c
+	action/q_shared.c
+)
+
+SET(HEADERS_ACTION
+	action/acesrc/acebot.h
+	action/acesrc/botchat.h
+	action/acesrc/botnav.h
+	action/acesrc/botscan.h
+	action/acesrc/cgf_sfx_fog.h
+	action/a_game.h
+	action/a_menu.h
+	action/a_radio.h
+	action/a_team.h
+	action/acebot.h
+	action/botnav.h
+	action/cgf_sfx_glass.h
+	action/g_local.h
+	action/game.h
+	action/m_player.h
+	action/q_shared.h
+)
+
 
 SET(SRC_CLIENT
 	client/ascii.c
@@ -664,6 +733,7 @@ ADD_LIBRARY(gamex86_baseq2 SHARED ${SRC_BASEQ2} ${HEADERS_BASEQ2} ${SRC_SHARED})
 ADD_LIBRARY(gamex86_xatrix SHARED ${SRC_XATRIX} ${HEADERS_XATRIX})
 ADD_LIBRARY(gamex86_rogue SHARED ${SRC_ROGUE} ${HEADERS_ROGUE})
 ADD_LIBRARY(gamex86_zaero SHARED ${SRC_ZAERO} ${HEADERS_ZAERO})
+ADD_LIBRARY(gamex86_action SHARED ${SRC_ACTION} ${HEADERS_ACTION})
 
 IF(WIN32)
 ADD_EXECUTABLE(client WIN32 
@@ -749,6 +819,8 @@ SOURCE_GROUP("rogue\\sources" FILES ${SRC_ROGUE})
 SOURCE_GROUP("rogue\\headers" FILES ${HEADERS_ROGUE})
 SOURCE_GROUP("zaero\\sources" FILES ${SRC_ZAERO})
 SOURCE_GROUP("zaero\\headers" FILES ${HEADERS_ZAERO})
+SOURCE_GROUP("action\\sources" FILES ${SRC_ACTION})
+SOURCE_GROUP("action\\headers" FILES ${HEADERS_ACTION})
 SOURCE_GROUP("client\\sources" FILES ${SRC_CLIENT})
 SOURCE_GROUP("client\\headers" FILES ${HEADERS_CLIENT})
 SOURCE_GROUP("server\\sources" FILES ${SRC_SERVER})
@@ -769,6 +841,7 @@ IF (WIN32)
 	TARGET_INCLUDE_DIRECTORIES(gamex86_xatrix PRIVATE ../VC/inc)
 	TARGET_INCLUDE_DIRECTORIES(gamex86_rogue PRIVATE ../VC/inc)
 	TARGET_INCLUDE_DIRECTORIES(gamex86_zaero PRIVATE ../VC/inc)
+	TARGET_INCLUDE_DIRECTORIES(gamex86_action PRIVATE ../VC/inc)
 	TARGET_SOURCES(gamex86_baseq2 PRIVATE windows/res/baseq2.rc)
 
 	TARGET_LINK_LIBRARIES(client winmm ws2_32)
@@ -784,12 +857,14 @@ IF (WIN32)
 	target_compile_options(gamex86_xatrix PRIVATE /wd4005 /wd4996)
 	target_compile_options(gamex86_rogue PRIVATE /wd4005 /wd4996)
 	target_compile_options(gamex86_zaero PRIVATE /wd4005 /wd4996)
+	target_compile_options(gamex86_action PRIVATE /wd4005 /wd4996)
 ENDIF()
 
 TARGET_INCLUDE_DIRECTORIES(gamex86_baseq2 PRIVATE ../inc)
 TARGET_INCLUDE_DIRECTORIES(gamex86_xatrix PRIVATE ../inc)
 TARGET_INCLUDE_DIRECTORIES(gamex86_rogue PRIVATE ../inc)
 TARGET_INCLUDE_DIRECTORIES(gamex86_zaero PRIVATE ../inc)
+TARGET_INCLUDE_DIRECTORIES(gamex86_action PRIVATE ../inc)
 
 TARGET_INCLUDE_DIRECTORIES(client PRIVATE ../inc)
 TARGET_INCLUDE_DIRECTORIES(client PRIVATE "${ZLIB_INCLUDE_DIRS}")
@@ -893,6 +968,22 @@ SET_TARGET_PROPERTIES(gamex86_zaero
     DEBUG_POSTFIX ""
 )
 
+SET_TARGET_PROPERTIES(gamex86_action
+    PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/action"
+    LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/action"
+    LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/action"
+    LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/action"
+    LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/action"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/action"
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/action"
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/action"
+    RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/action"
+    RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/action"
+    PREFIX ""
+    DEBUG_POSTFIX ""
+)
+
 IF(IS_64_BIT)
 	SET_TARGET_PROPERTIES(gamex86_baseq2
 		PROPERTIES
@@ -917,6 +1008,12 @@ SET_TARGET_PROPERTIES(gamex86_zaero
 		LIBRARY_OUTPUT_NAME "gamex86_64"
 		RUNTIME_OUTPUT_NAME "gamex86_64"
 	)		
+	
+SET_TARGET_PROPERTIES(gamex86_action
+		PROPERTIES
+		LIBRARY_OUTPUT_NAME "gamex86_64"
+		RUNTIME_OUTPUT_NAME "gamex86_64"
+	)			
 ENDIF()
 
 IF(CONFIG_LINUX_PACKAGING_SUPPORT)
