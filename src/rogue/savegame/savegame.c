@@ -249,6 +249,7 @@ InitGame(void)
 	//   1 = spawn with the flare gun
 	//   2 = spawn with the flare gun and some grenades
 	sv_flaregun = gi.cvar("sv_flaregun", "2", 0);
+	cl_monsterfootsteps = gi.cvar("cl_monsterfootsteps", "1", 0);
 
 	// export our own features
 	gi.cvar_forceset("g_features", va("%d", G_FEATURES));

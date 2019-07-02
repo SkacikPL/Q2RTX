@@ -16,6 +16,27 @@ static int sound_punch_hit1;
 static int sound_punch_hit2;
 static int sound_idle;
 
+static int  sound_step;
+static int  sound_step2;
+
+void stalker_footstep(edict_t *self)
+{
+	if (!cl_monsterfootsteps->integer)
+		return;
+
+	int     i;
+	i = rand() % (1 + 1 - 0) + 0;
+
+	if (i == 0)
+	{
+		gi.sound(self, CHAN_BODY, sound_step, 1, ATTN_NORM, 0);
+	}
+	else if (i == 1)
+	{
+		gi.sound(self, CHAN_BODY, sound_step2, 1, ATTN_NORM, 0);
+	}
+}
+
 int stalker_do_pounce(edict_t *self, vec3_t dest);
 void stalker_stand(edict_t *self);
 void stalker_run(edict_t *self);
@@ -328,9 +349,9 @@ stalker_stand(edict_t *self)
 }
 
 mframe_t stalker_frames_run[] = {
-	{ai_run, 13, NULL},
+	{ai_run, 13, stalker_footstep},
 	{ai_run, 17, NULL},
-	{ai_run, 21, NULL},
+	{ai_run, 21, stalker_footstep},
 	{ai_run, 18, NULL}
 };
 
@@ -360,12 +381,12 @@ stalker_run(edict_t *self)
 }
 
 mframe_t stalker_frames_walk[] = {
-	{ai_walk, 4, NULL},
+	{ai_walk, 4, stalker_footstep},
 	{ai_walk, 6, NULL},
 	{ai_walk, 8, NULL},
 	{ai_walk, 5, NULL},
 
-	{ai_walk, 4, NULL},
+	{ai_walk, 4, stalker_footstep},
 	{ai_walk, 6, NULL},
 	{ai_walk, 8, NULL},
 	{ai_walk, 4, NULL}
@@ -754,7 +775,7 @@ mframe_t stalker_frames_swing_l[] = {
 	{ai_charge, 6, NULL},
 	{ai_charge, 10, NULL},
 	{ai_charge, 5, stalker_swing_attack},
-	{ai_charge, 5, NULL},
+	{ai_charge, 5, stalker_footstep},
 	{ai_charge, 5, NULL},
 	{ai_charge, 5, NULL} /* stalker_swing_check_l */
 };
@@ -770,7 +791,7 @@ mframe_t stalker_frames_swing_r[] = {
 	{ai_charge, 4, NULL},
 	{ai_charge, 6, NULL},
 	{ai_charge, 6, stalker_swing_attack},
-	{ai_charge, 10, NULL},
+	{ai_charge, 10, stalker_footstep},
 	{ai_charge, 5, NULL} /* stalker_swing_check_r */
 };
 
@@ -1461,6 +1482,9 @@ SP_monster_stalker(edict_t *self)
 	sound_punch_hit1 = gi.soundindex("stalker/melee1.wav");
 	sound_punch_hit2 = gi.soundindex("stalker/melee2.wav");
 	sound_idle = gi.soundindex("stalker/idle.wav");
+
+	sound_step = gi.soundindex("stalker/step1.wav");
+	sound_step2 = gi.soundindex("stalker/step2.wav");
 
 	gi.modelindex("models/proj/laser2/tris.md2");
 

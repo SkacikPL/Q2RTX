@@ -623,6 +623,7 @@ extern cvar_t *g_disruptor;
 
 extern  cvar_t  *sv_features;
 extern  cvar_t  *sv_flaregun;
+extern  cvar_t  *cl_monsterfootsteps;
 
 // extended features
 

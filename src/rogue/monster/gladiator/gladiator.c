@@ -19,6 +19,27 @@ static int sound_idle;
 static int sound_search;
 static int sound_sight;
 
+static int  sound_step;
+static int  sound_step2;
+
+void gladiator_footstep(edict_t *self)
+{
+	if (!cl_monsterfootsteps->integer)
+		return;
+
+	int     i;
+	i = rand() % (1 + 1 - 0) + 0;
+
+	if (i == 0)
+	{
+		gi.sound(self, CHAN_BODY, sound_step, 1, ATTN_NORM, 0);
+	}
+	else if (i == 1)
+	{
+		gi.sound(self, CHAN_BODY, sound_step2, 1, ATTN_NORM, 0);
+	}
+}
+
 void
 gladiator_idle(edict_t *self)
 {
@@ -92,22 +113,22 @@ gladiator_stand(edict_t *self)
 }
 
 mframe_t gladiator_frames_walk[] = {
-	{ai_walk, 15, NULL},
-	{ai_walk, 7, NULL},
-	{ai_walk, 6, NULL},
-	{ai_walk, 5, NULL},
-	{ai_walk, 2, NULL},
-	{ai_walk, 0, NULL},
-	{ai_walk, 2, NULL},
-	{ai_walk, 8, NULL},
-	{ai_walk, 12, NULL},
-	{ai_walk, 8, NULL},
-	{ai_walk, 5, NULL},
-	{ai_walk, 5, NULL},
-	{ai_walk, 2, NULL},
-	{ai_walk, 2, NULL},
-	{ai_walk, 1, NULL},
-	{ai_walk, 8, NULL}
+	{ ai_walk, 15, NULL },
+	{ ai_walk, 7,  NULL },
+	{ ai_walk, 6,  NULL },
+	{ ai_walk, 5,  NULL },
+	{ ai_walk, 2,  gladiator_footstep },
+	{ ai_walk, 0,  NULL },
+	{ ai_walk, 2,  NULL },
+	{ ai_walk, 8,  NULL },
+	{ ai_walk, 12, NULL },
+	{ ai_walk, 8,  NULL },
+	{ ai_walk, 5,  NULL },
+	{ ai_walk, 5,  NULL },
+	{ ai_walk, 2,  gladiator_footstep },
+	{ ai_walk, 2,  NULL },
+	{ ai_walk, 1,  NULL },
+	{ ai_walk, 8,  NULL }
 };
 
 mmove_t gladiator_move_walk = {
@@ -129,12 +150,12 @@ gladiator_walk(edict_t *self)
 }
 
 mframe_t gladiator_frames_run[] = {
-	{ai_run, 23, NULL},
-	{ai_run, 14, NULL},
-	{ai_run, 14, NULL},
-	{ai_run, 21, NULL},
-	{ai_run, 12, NULL},
-	{ai_run, 13, NULL}
+	{ ai_run, 23, NULL },
+	{ ai_run, 14, NULL },
+	{ ai_run, 14, gladiator_footstep },
+	{ ai_run, 21, NULL },
+	{ ai_run, 12, NULL },
+	{ ai_run, 13, gladiator_footstep }
 };
 
 mmove_t gladiator_move_run = {
@@ -493,6 +514,9 @@ SP_monster_gladiator(edict_t *self)
 	sound_idle = gi.soundindex("gladiator/gldidle1.wav");
 	sound_search = gi.soundindex("gladiator/gldsrch1.wav");
 	sound_sight = gi.soundindex("gladiator/sight.wav");
+
+	sound_step = gi.soundindex("gladiator/step1.wav");
+	sound_step2 = gi.soundindex("gladiator/step2.wav");
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;

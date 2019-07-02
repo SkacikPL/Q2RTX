@@ -48,6 +48,27 @@ static int commander_sound_hook_heal;
 static int commander_sound_hook_retract;
 static int commander_sound_spawn;
 
+static int  sound_step;
+static int  sound_step2;
+
+void medic_footstep(edict_t *self)
+{
+	if (!cl_monsterfootsteps->integer)
+		return;
+
+	int     i;
+	i = rand() % (1 + 1 - 0) + 0;
+
+	if (i == 0)
+	{
+		gi.sound(self, CHAN_BODY, sound_step, 1, ATTN_NORM, 0);
+	}
+	else if (i == 1)
+	{
+		gi.sound(self, CHAN_BODY, sound_step2, 1, ATTN_NORM, 0);
+	}
+}
+
 char *reinforcements[] = {
 	"monster_soldier_light",  /* 0 */
 	"monster_soldier",        /* 1 */
@@ -496,18 +517,18 @@ medic_stand(edict_t *self)
 }
 
 mframe_t medic_frames_walk[] = {
-	{ai_walk, 6.2, NULL},
-	{ai_walk, 18.1, NULL},
-	{ai_walk, 1, NULL},
-	{ai_walk, 9, NULL},
-	{ai_walk, 10, NULL},
-	{ai_walk, 9, NULL},
-	{ai_walk, 11, NULL},
-	{ai_walk, 11.6, NULL},
-	{ai_walk, 2, NULL},
-	{ai_walk, 9.9, NULL},
-	{ai_walk, 14, NULL},
-	{ai_walk, 9.3, NULL}
+	{ ai_walk, 6.2,   NULL },
+	{ ai_walk, 18.1,  medic_footstep },
+	{ ai_walk, 1,     NULL },
+	{ ai_walk, 9,     NULL },
+	{ ai_walk, 10,    NULL },
+	{ ai_walk, 9,     NULL },
+	{ ai_walk, 11,    NULL },
+	{ ai_walk, 11.6,  medic_footstep },
+	{ ai_walk, 2,     NULL },
+	{ ai_walk, 9.9,   NULL },
+	{ ai_walk, 14,    NULL },
+	{ ai_walk, 9.3,   NULL }
 };
 
 mmove_t medic_move_walk = {
@@ -529,11 +550,11 @@ medic_walk(edict_t *self)
 }
 
 mframe_t medic_frames_run[] = {
-	{ai_run, 18, NULL},
+	{ai_run, 18, medic_footstep},
 	{ai_run, 22.5, NULL},
 	{ai_run, 25.4, monster_done_dodge},
 	{ai_run, 23.4, NULL},
-	{ai_run, 24, NULL},
+	{ai_run, 24, medic_footstep},
 	{ai_run, 35.6, NULL}
 };
 
@@ -600,21 +621,21 @@ mmove_t medic_move_pain1 = {
 };
 
 mframe_t medic_frames_pain2[] = {
-	{ai_move, 0, NULL},
-	{ai_move, 0, NULL},
-	{ai_move, 0, NULL},
-	{ai_move, 0, NULL},
-	{ai_move, 0, NULL},
-	{ai_move, 0, NULL},
-	{ai_move, 0, NULL},
-	{ai_move, 0, NULL},
-	{ai_move, 0, NULL},
-	{ai_move, 0, NULL},
-	{ai_move, 0, NULL},
-	{ai_move, 0, NULL},
-	{ai_move, 0, NULL},
-	{ai_move, 0, NULL},
-	{ai_move, 0, NULL}
+	{ ai_move, 0, NULL },
+	{ ai_move, 0, NULL },
+	{ ai_move, 0, NULL },
+	{ ai_move, 0, NULL },
+	{ ai_move, 0, NULL },
+	{ ai_move, 0, medic_footstep },
+	{ ai_move, 0, NULL },
+	{ ai_move, 0, NULL },
+	{ ai_move, 0, NULL },
+	{ ai_move, 0, NULL },
+	{ ai_move, 0, NULL },
+	{ ai_move, 0, NULL },
+	{ ai_move, 0, NULL },
+	{ ai_move, 0, NULL },
+	{ ai_move, 0, medic_footstep }
 };
 
 mmove_t medic_move_pain2 = {
@@ -1228,35 +1249,34 @@ medic_hook_retract(edict_t *self)
 }
 
 mframe_t medic_frames_attackCable[] = {
-	{ai_charge, 2, NULL},                     /* 33 */
-	{ai_charge, 3, NULL},
-	{ai_charge, 5, NULL},
-	{ai_charge, -4.4, NULL},                  /* 36 */
-	{ai_charge, -4.7, NULL},                  /* 37 */
-	{ai_charge, -5, NULL},
-	{ai_charge, -6, NULL},
-	{ai_charge, -4, NULL},                    /* 40 */
-	{ai_charge, 0, NULL},
-	{ai_move, 0, medic_hook_launch},          /* 42 */
-	{ai_move, 0, medic_cable_attack},         /* 43 */
-	{ai_move, 0, medic_cable_attack},
-	{ai_move, 0, medic_cable_attack},
-	{ai_move, 0, medic_cable_attack},
-	{ai_move, 0, medic_cable_attack},
-	{ai_move, 0, medic_cable_attack},
-	{ai_move, 0, medic_cable_attack},
-	{ai_move, 0, medic_cable_attack},
-	{ai_move, 0, medic_cable_attack},         /* 51 */
-	{ai_move, 0, medic_hook_retract},         /* 52 */
-	{ai_move, -1.5, NULL},
-	{ai_move, -1.2, NULL},
-	{ai_move, -3, NULL},
-	{ai_move, -2, NULL},
-	{ai_move, 0.3, NULL},
-	{ai_move, 0.7, NULL},
-	{ai_move, 1.2, NULL},
-	{ai_move, 1.3, NULL}                      /* 60 */
-
+	{ ai_move, 2,     NULL },
+	{ ai_move, 3,     NULL },
+	{ ai_move, 5,     NULL },
+	{ ai_move, 4.4,   NULL },
+	{ ai_charge, 4.7, NULL },
+	{ ai_charge, 5,   NULL },
+	{ ai_charge, 6,   NULL },
+	{ ai_charge, 4,   medic_footstep },
+	{ ai_charge, 0,   NULL },
+	{ ai_move, 0,     medic_hook_launch },
+	{ ai_move, 0,     medic_cable_attack },
+	{ ai_move, 0,     medic_cable_attack },
+	{ ai_move, 0,     medic_cable_attack },
+	{ ai_move, 0,     medic_cable_attack },
+	{ ai_move, 0,     medic_cable_attack },
+	{ ai_move, 0,     medic_cable_attack },
+	{ ai_move, 0,     medic_cable_attack },
+	{ ai_move, 0,     medic_cable_attack },
+	{ ai_move, 0,     medic_cable_attack },
+	{ ai_move, -15,   medic_hook_retract },
+	{ ai_move, -1.5,  NULL },
+	{ ai_move, -1.2,  medic_footstep },
+	{ ai_move, -3,    NULL },
+	{ ai_move, -2,    NULL },
+	{ ai_move, 0.3,   NULL },
+	{ ai_move, 0.7,   NULL },
+	{ ai_move, 1.2,   NULL },
+	{ ai_move, 1.3,   NULL }
 };
 mmove_t medic_move_attackCable = {
 	FRAME_attack33,
@@ -1945,6 +1965,9 @@ SP_monster_medic(edict_t *self)
 	walkmonster_start(self);
 
 	self->monsterinfo.aiflags |= AI_IGNORE_SHOTS;
+
+	sound_step = gi.soundindex("medic/step1.wav");
+	sound_step2 = gi.soundindex("medic/step2.wav");
 
 	if (self->mass > 400)
 	{

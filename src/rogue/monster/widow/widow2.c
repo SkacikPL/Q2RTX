@@ -18,6 +18,27 @@ static int sound_death;
 static int sound_search1;
 static int sound_tentacles_retract;
 
+static int  sound_step;
+static int  sound_step2;
+
+void widow_footstep(edict_t *self)
+{
+	if (!cl_monsterfootsteps->integer)
+		return;
+
+	int     i;
+	i = rand() % (1 + 1 - 0) + 0;
+
+	if (i == 0)
+	{
+		gi.sound(self, CHAN_BODY, sound_step, 1, ATTN_NORM, 0);
+	}
+	else if (i == 1)
+	{
+		gi.sound(self, CHAN_BODY, sound_step2, 1, ATTN_NORM, 0);
+	}
+}
+
 static vec3_t spawnpoints[] = {
 	{30, 135, 0},
 	{30, -135, 0}
@@ -304,12 +325,12 @@ mmove_t widow2_move_stand = {
 };
 
 mframe_t widow2_frames_walk[] = {
-	{ai_walk, 9.01, NULL},
+	{ai_walk, 9.01, widow_footstep},
 	{ai_walk, 7.55, NULL},
 	{ai_walk, 7.01, NULL},
 	{ai_walk, 6.66, NULL},
 	{ai_walk, 6.20, NULL},
-	{ai_walk, 5.78, NULL},
+	{ai_walk, 5.78, widow_footstep},
 	{ai_walk, 7.25, NULL},
 	{ai_walk, 8.37, NULL},
 	{ai_walk, 10.41, NULL}
@@ -517,7 +538,7 @@ Widow2StartSweep(edict_t *self)
 
 mframe_t widow2_frames_spawn[] = {
 	{ai_charge, 0, NULL},
-	{ai_charge, 0, NULL},
+	{ai_charge, 0, widow_footstep},
 	{ai_charge, 0, widow_start_spawn},
 	{ai_charge, 0, Widow2Beam},
 	{ai_charge, 0, Widow2Beam},         /* 5 */
@@ -767,7 +788,7 @@ mframe_t widow2_frames_death[] = {
 
 	{ai_move, 0, WidowExplosion2},      /* 6 boom */
 	{ai_move, 0, NULL},
-	{ai_move, 0, NULL},
+	{ai_move, 0, widow_footstep},
 	{ai_move, 0, NULL},
 	{ai_move, 0, NULL},                 /* 10 */
 
@@ -1446,6 +1467,9 @@ Widow2Precache()
 	gi.modelindex("models/monsters/blackwidow2/gib2/tris.md2");
 	gi.modelindex("models/monsters/blackwidow2/gib3/tris.md2");
 	gi.modelindex("models/monsters/blackwidow2/gib4/tris.md2");
+
+	gi.soundindex("stalker/step1.wav");
+	gi.soundindex("stalker/step2.wav");
 }
 
 /*
@@ -1471,6 +1495,9 @@ SP_monster_widow2(edict_t *self)
 	sound_death = gi.soundindex("widow/death.wav");
 	sound_search1 = gi.soundindex("bosshovr/bhvunqv1.wav");
 	sound_tentacles_retract = gi.soundindex("brain/brnatck3.wav");
+
+	sound_step = gi.soundindex("widow/step1.wav");
+	sound_step2 = gi.soundindex("widow/step2.wav");
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;

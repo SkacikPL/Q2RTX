@@ -1836,6 +1836,9 @@ WidowPrecache()
 	gi.soundindex("misc/bigtele.wav");
 	gi.soundindex("widow/bwstep3.wav");
 	gi.soundindex("widow/bwstep2.wav");
+
+	gi.soundindex("stalker/step1.wav");
+	gi.soundindex("stalker/step2.wav");
 }
 
 /*

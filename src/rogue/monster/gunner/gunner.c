@@ -16,6 +16,27 @@ static int sound_open;
 static int sound_search;
 static int sound_sight;
 
+static int  sound_step;
+static int  sound_step2;
+
+void gunner_footstep(edict_t *self)
+{
+	if (!cl_monsterfootsteps->integer)
+		return;
+
+	int     i;
+	i = rand() % (1 + 1 - 0) + 0;
+
+	if (i == 0)
+	{
+		gi.sound(self, CHAN_BODY, sound_step, 1, ATTN_NORM, 0);
+	}
+	else if (i == 1)
+	{
+		gi.sound(self, CHAN_BODY, sound_step2, 1, ATTN_NORM, 0);
+	}
+}
+
 qboolean visible(edict_t *self, edict_t *other);
 void GunnerGrenade(edict_t *self);
 void GunnerFire(edict_t *self);
@@ -193,19 +214,19 @@ gunner_stand(edict_t *self)
 }
 
 mframe_t gunner_frames_walk[] = {
-	{ai_walk, 0, NULL},
-	{ai_walk, 3, NULL},
-	{ai_walk, 4, NULL},
-	{ai_walk, 5, NULL},
-	{ai_walk, 7, NULL},
-	{ai_walk, 2, NULL},
-	{ai_walk, 6, NULL},
-	{ai_walk, 4, NULL},
-	{ai_walk, 2, NULL},
-	{ai_walk, 7, NULL},
-	{ai_walk, 5, NULL},
-	{ai_walk, 7, NULL},
-	{ai_walk, 4, NULL}
+	{ ai_walk, 0, gunner_footstep },
+	{ ai_walk, 3, NULL },
+	{ ai_walk, 4, NULL },
+	{ ai_walk, 5, NULL },
+	{ ai_walk, 7, NULL },
+	{ ai_walk, 2, gunner_footstep },
+	{ ai_walk, 6, NULL },
+	{ ai_walk, 4, NULL },
+	{ ai_walk, 2, NULL },
+	{ ai_walk, 7, NULL },
+	{ ai_walk, 5, NULL },
+	{ ai_walk, 7, NULL },
+	{ ai_walk, 4, gunner_footstep }
 };
 
 mmove_t gunner_move_walk = {
@@ -227,14 +248,14 @@ gunner_walk(edict_t *self)
 }
 
 mframe_t gunner_frames_run[] = {
-	{ai_run, 26, NULL},
-	{ai_run, 9, NULL},
-	{ai_run, 9, NULL},
-	{ai_run, 9, monster_done_dodge},
-	{ai_run, 15, NULL},
-	{ai_run, 10, NULL},
-	{ai_run, 13, NULL},
-	{ai_run, 6, NULL}
+	{ ai_run, 26, NULL },
+	{ ai_run, 9,  gunner_footstep },
+	{ ai_run, 9,  NULL },
+	{ ai_run, 9,  NULL },
+	{ ai_run, 15, NULL },
+	{ ai_run, 10, gunner_footstep },
+	{ ai_run, 13, NULL },
+	{ ai_run, 6,  NULL }
 };
 
 mmove_t gunner_move_run = {
@@ -265,12 +286,12 @@ gunner_run(edict_t *self)
 }
 
 mframe_t gunner_frames_runandshoot[] = {
-	{ai_run, 32, NULL},
-	{ai_run, 15, NULL},
-	{ai_run, 10, NULL},
-	{ai_run, 18, NULL},
-	{ai_run, 8, NULL},
-	{ai_run, 20, NULL}
+	{ ai_run, 32, NULL },
+	{ ai_run, 15, gunner_footstep },
+	{ ai_run, 10, NULL },
+	{ ai_run, 18, NULL },
+	{ ai_run, 8,  gunner_footstep },
+	{ ai_run, 20, NULL }
 };
 
 mmove_t gunner_move_runandshoot = {
@@ -307,14 +328,14 @@ mmove_t gunner_move_pain3 = {
 };
 
 mframe_t gunner_frames_pain2[] = {
-	{ai_move, -2, NULL},
-	{ai_move, 11, NULL},
-	{ai_move, 6, NULL},
-	{ai_move, 2, NULL},
-	{ai_move, -1, NULL},
-	{ai_move, -7, NULL},
-	{ai_move, -2, NULL},
-	{ai_move, -7, NULL}
+	{ ai_move, -2, NULL },
+	{ ai_move, 11, NULL },
+	{ ai_move, 6,  gunner_footstep },
+	{ ai_move, 2,  NULL },
+	{ ai_move, -1, NULL },
+	{ ai_move, -7, NULL },
+	{ ai_move, -2, NULL },
+	{ ai_move, -7, gunner_footstep }
 };
 
 mmove_t gunner_move_pain2 = {
@@ -325,24 +346,24 @@ mmove_t gunner_move_pain2 = {
 };
 
 mframe_t gunner_frames_pain1[] = {
-	{ai_move, 2, NULL},
-	{ai_move, 0, NULL},
-	{ai_move, -5, NULL},
-	{ai_move, 3, NULL},
-	{ai_move, -1, NULL},
-	{ai_move, 0, NULL},
-	{ai_move, 0, NULL},
-	{ai_move, 0, NULL},
-	{ai_move, 0, NULL},
-	{ai_move, 1, NULL},
-	{ai_move, 1, NULL},
-	{ai_move, 2, NULL},
-	{ai_move, 1, NULL},
-	{ai_move, 0, NULL},
-	{ai_move, -2, NULL},
-	{ai_move, -2, NULL},
-	{ai_move, 0, NULL},
-	{ai_move, 0, NULL}
+	{ ai_move, 2,  NULL },
+	{ ai_move, 0,  NULL },
+	{ ai_move, -5, gunner_footstep },
+	{ ai_move, 3,  NULL },
+	{ ai_move, -1, NULL },
+	{ ai_move, 0,  NULL },
+	{ ai_move, 0,  NULL },
+	{ ai_move, 0,  NULL },
+	{ ai_move, 0,  NULL },
+	{ ai_move, 1,  NULL },
+	{ ai_move, 1,  NULL },
+	{ ai_move, 2,  NULL },
+	{ ai_move, 1,  gunner_footstep },
+	{ ai_move, 0,  NULL },
+	{ ai_move, -2, NULL },
+	{ ai_move, -2, NULL },
+	{ ai_move, 0,  gunner_footstep },
+	{ ai_move, 0,  NULL }
 };
 
 mmove_t gunner_move_pain1 = {
@@ -759,13 +780,13 @@ GunnerGrenade(edict_t *self)
 }
 
 mframe_t gunner_frames_attack_chain[] = {
-	{ai_charge, 0, gunner_opengun},
-	{ai_charge, 0, NULL},
-	{ai_charge, 0, NULL},
-	{ai_charge, 0, NULL},
-	{ai_charge, 0, NULL},
-	{ai_charge, 0, NULL},
-	{ai_charge, 0, NULL}
+	{ ai_charge, 0, gunner_opengun },
+	{ ai_charge, 0, gunner_footstep },
+	{ ai_charge, 0, NULL },
+	{ ai_charge, 0, NULL },
+	{ ai_charge, 0, NULL },
+	{ ai_charge, 0, NULL },
+	{ ai_charge, 0, NULL }
 };
 
 mmove_t gunner_move_attack_chain = {
@@ -794,13 +815,13 @@ mmove_t gunner_move_fire_chain = {
 };
 
 mframe_t gunner_frames_endfire_chain[] = {
-	{ai_charge, 0, NULL},
-	{ai_charge, 0, NULL},
-	{ai_charge, 0, NULL},
-	{ai_charge, 0, NULL},
-	{ai_charge, 0, NULL},
-	{ai_charge, 0, NULL},
-	{ai_charge, 0, NULL}
+	{ ai_charge, 0, NULL },
+	{ ai_charge, 0, NULL },
+	{ ai_charge, 0, NULL },
+	{ ai_charge, 0, NULL },
+	{ ai_charge, 0, NULL },
+	{ ai_charge, 0, NULL },
+	{ ai_charge, 0, gunner_footstep }
 };
 
 mmove_t gunner_move_endfire_chain = {
@@ -1226,6 +1247,9 @@ SP_monster_gunner(edict_t *self)
 
 	gi.soundindex("gunner/gunatck2.wav");
 	gi.soundindex("gunner/gunatck3.wav");
+
+	sound_step = gi.soundindex("gunner/step1.wav");
+	sound_step2 = gi.soundindex("gunner/step2.wav");
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
