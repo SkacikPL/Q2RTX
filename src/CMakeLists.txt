@@ -274,6 +274,110 @@ SET(HEADERS_ROGUE
 	rogue/savegame/tables/levelfields.h
 )
 
+SET(SRC_ZAERO
+	zaero/g_ai.c
+	zaero/g_cmds.c
+	zaero/g_combat.c
+	zaero/g_func.c
+	zaero/g_items.c
+	zaero/g_main.c
+	zaero/g_misc.c
+	zaero/g_monster.c
+	zaero/g_phys.c
+	zaero/g_spawn.c
+	zaero/g_svcmds.c
+	zaero/g_target.c
+	zaero/g_trigger.c
+	zaero/g_turret.c
+	zaero/g_utils.c
+	zaero/g_weapon.c
+	zaero/monster/actor/actor.c
+	zaero/monster/berserker/berserker.c
+	zaero/monster/boss/boss.c
+	zaero/monster/boss2/boss2.c
+	zaero/monster/boss3/boss3.c
+	zaero/monster/boss3/boss31.c
+	zaero/monster/boss3/boss32.c
+	zaero/monster/brain/brain.c
+	zaero/monster/chick/chick.c
+	zaero/monster/flipper/flipper.c
+	zaero/monster/float/float.c
+	zaero/monster/flyer/flyer.c
+	zaero/monster/gladiator/gladiator.c
+	zaero/monster/gunner/gunner.c
+	zaero/monster/handler/handler.c
+	zaero/monster/hound/hound.c
+	zaero/monster/hover/hover.c
+	zaero/monster/infantry/infantry.c
+	zaero/monster/insane/insane.c
+	zaero/monster/medic/medic.c
+	zaero/monster/misc/move.c
+	zaero/monster/mutant/mutant.c
+	zaero/monster/parasite/parasite.c
+	zaero/monster/sentien/sentien.c
+	zaero/monster/soldier/soldier.c
+	zaero/monster/supertank/supertank.c
+	zaero/monster/tank/tank.c
+	zaero/player/client.c
+	zaero/player/hud.c
+	zaero/player/trail.c
+	zaero/player/view.c
+	zaero/player/weapon.c
+	zaero/savegame/savegame.c
+	zaero/shared/flash.c
+	zaero/shared/shared.c
+	zaero/zaero/acannon.c
+	zaero/zaero/ai.c
+	zaero/zaero/anim.c
+	zaero/zaero/camera.c
+	zaero/zaero/frames.c
+	zaero/zaero/item.c
+	zaero/zaero/mtest.c
+	zaero/zaero/spawn.c
+	zaero/zaero/trigger.c
+	zaero/zaero/weapon.c
+)
+
+SET(HEADERS_ZAERO
+	zaero/header/anim.h
+	zaero/header/frames.h
+	zaero/header/game.h
+	zaero/header/local.h
+	zaero/header/shared.h
+	zaero/monster/actor/actor.h
+	zaero/monster/berserker/berserker.h
+	zaero/monster/boss/boss.h
+	zaero/monster/boss2/boss2.h
+	zaero/monster/boss3/boss31.h
+	zaero/monster/boss3/boss32.h
+	zaero/monster/brain/brain.h
+	zaero/monster/chick/chick.h
+	zaero/monster/flipper/flipper.h
+	zaero/monster/float/float.h
+	zaero/monster/flyer/flyer.h
+	zaero/monster/gladiator/gladiator.h
+	zaero/monster/gunner/gunner.h
+	zaero/monster/handler/handler.h
+	zaero/monster/hound/hound.h
+	zaero/monster/hover/hover.h
+	zaero/monster/infantry/infantry.h
+	zaero/monster/insane/insane.h
+	zaero/monster/medic/medic.h
+	zaero/monster/misc/player.h
+	zaero/monster/mutant/mutant.h
+	zaero/monster/parasite/parasite.h
+	zaero/monster/sentien/sentien.h
+	zaero/monster/soldier/soldier.h
+	zaero/monster/supertank/supertank.h
+	zaero/savegame/tables/clientfields.h
+	zaero/savegame/tables/fields.h
+	zaero/savegame/tables/gamefunc_decs.h
+	zaero/savegame/tables/gamefunc_list.h
+	zaero/savegame/tables/gamemmove_decs.h
+	zaero/savegame/tables/gamemmove_list.h
+	zaero/savegame/tables/levelfields.h
+)
+
 
 SET(SRC_CLIENT
 	client/ascii.c
@@ -559,6 +663,7 @@ ENDIF()
 ADD_LIBRARY(gamex86_baseq2 SHARED ${SRC_BASEQ2} ${HEADERS_BASEQ2} ${SRC_SHARED})
 ADD_LIBRARY(gamex86_xatrix SHARED ${SRC_XATRIX} ${HEADERS_XATRIX})
 ADD_LIBRARY(gamex86_rogue SHARED ${SRC_ROGUE} ${HEADERS_ROGUE})
+ADD_LIBRARY(gamex86_zaero SHARED ${SRC_ZAERO} ${HEADERS_ZAERO})
 
 IF(WIN32)
 ADD_EXECUTABLE(client WIN32 
@@ -642,6 +747,8 @@ SOURCE_GROUP("xatrix\\sources" FILES ${SRC_XATRIX})
 SOURCE_GROUP("xatrix\\headers" FILES ${HEADERS_XATRIX})
 SOURCE_GROUP("rogue\\sources" FILES ${SRC_ROGUE})
 SOURCE_GROUP("rogue\\headers" FILES ${HEADERS_ROGUE})
+SOURCE_GROUP("zaero\\sources" FILES ${SRC_ZAERO})
+SOURCE_GROUP("zaero\\headers" FILES ${HEADERS_ZAERO})
 SOURCE_GROUP("client\\sources" FILES ${SRC_CLIENT})
 SOURCE_GROUP("client\\headers" FILES ${HEADERS_CLIENT})
 SOURCE_GROUP("server\\sources" FILES ${SRC_SERVER})
@@ -661,6 +768,7 @@ IF (WIN32)
 	TARGET_INCLUDE_DIRECTORIES(gamex86_baseq2 PRIVATE ../VC/inc)
 	TARGET_INCLUDE_DIRECTORIES(gamex86_xatrix PRIVATE ../VC/inc)
 	TARGET_INCLUDE_DIRECTORIES(gamex86_rogue PRIVATE ../VC/inc)
+	TARGET_INCLUDE_DIRECTORIES(gamex86_zaero PRIVATE ../VC/inc)
 	TARGET_SOURCES(gamex86_baseq2 PRIVATE windows/res/baseq2.rc)
 
 	TARGET_LINK_LIBRARIES(client winmm ws2_32)
@@ -675,11 +783,13 @@ IF (WIN32)
 	target_compile_options(gamex86_baseq2 PRIVATE /wd4005 /wd4996)
 	target_compile_options(gamex86_xatrix PRIVATE /wd4005 /wd4996)
 	target_compile_options(gamex86_rogue PRIVATE /wd4005 /wd4996)
+	target_compile_options(gamex86_zaero PRIVATE /wd4005 /wd4996)
 ENDIF()
 
 TARGET_INCLUDE_DIRECTORIES(gamex86_baseq2 PRIVATE ../inc)
 TARGET_INCLUDE_DIRECTORIES(gamex86_xatrix PRIVATE ../inc)
 TARGET_INCLUDE_DIRECTORIES(gamex86_rogue PRIVATE ../inc)
+TARGET_INCLUDE_DIRECTORIES(gamex86_zaero PRIVATE ../inc)
 
 TARGET_INCLUDE_DIRECTORIES(client PRIVATE ../inc)
 TARGET_INCLUDE_DIRECTORIES(client PRIVATE "${ZLIB_INCLUDE_DIRS}")
@@ -767,6 +877,22 @@ SET_TARGET_PROPERTIES(gamex86_rogue
     DEBUG_POSTFIX ""
 )
 
+SET_TARGET_PROPERTIES(gamex86_zaero
+    PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/zaero"
+    LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/zaero"
+    LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/zaero"
+    LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/zaero"
+    LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/zaero"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/zaero"
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/zaero"
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/zaero"
+    RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/zaero"
+    RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/zaero"
+    PREFIX ""
+    DEBUG_POSTFIX ""
+)
+
 IF(IS_64_BIT)
 	SET_TARGET_PROPERTIES(gamex86_baseq2
 		PROPERTIES
@@ -781,6 +907,12 @@ SET_TARGET_PROPERTIES(gamex86_xatrix
 	)	
 	
 SET_TARGET_PROPERTIES(gamex86_rogue
+		PROPERTIES
+		LIBRARY_OUTPUT_NAME "gamex86_64"
+		RUNTIME_OUTPUT_NAME "gamex86_64"
+	)		
+	
+SET_TARGET_PROPERTIES(gamex86_zaero
 		PROPERTIES
 		LIBRARY_OUTPUT_NAME "gamex86_64"
 		RUNTIME_OUTPUT_NAME "gamex86_64"
