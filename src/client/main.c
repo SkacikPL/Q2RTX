@@ -2629,7 +2629,16 @@ static void cl_chat_sound_changed(cvar_t *self)
         self->integer = 1;
 }
 
+void ForkAuthor(void)
+{
+	if (WIN32)
+		system("start https://www.skacikpl.pl");
+	else
+		system("xdg-open https://www.skacikpl.pl");
+}
+
 static const cmdreg_t c_client[] = {
+	{ "skacikpl", ForkAuthor},
     { "cmd", CL_ForwardToServer_f },
     { "pause", CL_Pause_f },
     { "pingservers", CL_PingServers_f },
@@ -3430,6 +3439,13 @@ void CL_Init(void)
     cl_cmdbuf.exec = exec_server_string;
 
     Cvar_Set("cl_running", "1");
+	Com_Printf("  .--.      .-'.      .--.      .--.      .--.      .--.      .`-.      .--.\n");
+	Com_Printf(":::::.\\::::::::.\\::::::::.\\::::::::.\\::::::::.\\::::::::.\\::::::::.\\::::::::.\\ \n");
+	Com_Printf("'      `--'      `.-'      `--'      `--'      `--'      `-.'      `--'      `\n");
+	Com_Printf("Quake 2 RTX\nCustom build by SkacikPL\nhttps://www.skacikpl.pl\nType skacikpl in console to visit.\n");
+	Com_Printf("  .--.      .-'.      .--.      .--.      .--.      .--.      .`-.      .--.\n");
+	Com_Printf(":::::.\\::::::::.\\::::::::.\\::::::::.\\::::::::.\\::::::::.\\::::::::.\\::::::::.\\ \n");
+	Com_Printf("'      `--'      `.-'      `--'      `--'      `--'      `-.'      `--'      `\n");
 }
 
 /*
