@@ -11,7 +11,8 @@
  - Custom launcher for easy switching between base game and expansions
  - Open AL effects extensions ported from Yamagi Quake 2, enabling low pass filter in water and doppler effect scaling with relative object speed. Also including brand new experimental (and very simplistic) sound occlusion, can be toggled via s_occlusion and scaled via s_occlusion_strength (higher values decrease the effect).Reverb is enabled by default, can be disabled via s_reverb 0. Also by default picks preset automatically out of 7 presets based on surrounding size, this function can be disabled via s_reverb_preset_autopick 0. Presets can be set manually via s_reverb_preset (0-113). (Combine with OpenAL soft for best results and HRTF support https://github.com/kcat/openal-soft )
  - Voice input from default recording device passed into game and processed with same effects as other ingame sounds, controlled via s_voiceinput 0/1 and s_voiceinput_volume.
- - Footsteps sounds for all ground enemies (baseq2 only at the moment), can be disabled via cl_monsterfootsteps 0.
+ - Footsteps sounds for all ground enemies (baseq2 and Ground Zero only at the moment), can be disabled via cl_monsterfootsteps 0.
+ - Zaero mod support (courtesy of Yamagi Quake 2 yet again). 
 
 
 
