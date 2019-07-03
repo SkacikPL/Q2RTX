@@ -13,6 +13,7 @@
  - Voice input from default recording device passed into game and processed with same effects as other ingame sounds, controlled via s_voiceinput 0/1 and s_voiceinput_volume.
  - Footsteps sounds for all ground enemies (baseq2 and Ground Zero only at the moment), can be disabled via cl_monsterfootsteps 0.
  - Zaero mod support (courtesy of Yamagi Quake 2 yet again). 
+ - Action Quake 2 support (courtesy of Quake 2 DOS: https://bitbucket.org/neozeed/q2dos/src/master/action/)
 
 
 
