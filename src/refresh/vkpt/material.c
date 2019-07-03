@@ -28,6 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <assert.h>
 
 extern int registration_sequence;
+extern cvar_t *cvar_pt_assign_unknown_shaders;
 
 //
 // CSV parsing
@@ -462,6 +463,7 @@ pbr_material_t * MAT_FindPBRMaterial(char const * name)
 	char name_copy[MAX_QPATH];
 	int len = truncateExtension(name, name_copy);
 	assert(len>0);
+	qboolean automaticshader;
 
 	pbr_materials_table_t * table = &pbr_materials_table;
 
@@ -505,6 +507,53 @@ pbr_material_t * MAT_FindPBRMaterial(char const * name)
 	MAT_Reset(mat, index);
 	strcpy(mat->name, name_copy);
 	Com_Printf("Created a material entry %d for unknown material %s\n", index, name_copy);
+
+	/**/
+	if (cvar_pt_assign_unknown_shaders->integer)
+	{
+		if (strstr(name, "water") || strstr(name, "wtr") || strstr(name, "wter") || strstr(name, "mud") || strstr(name, "redfield") || strstr(name, "yelfield"))
+		{
+			mat->flags = MATERIAL_KIND_WATER;
+			automaticshader = qtrue;
+		}
+
+		if (strstr(name, "sky"))
+		{
+			mat->flags = MATERIAL_KIND_SKY;
+			automaticshader = qtrue;
+		}
+
+		if (strstr(name, "sewer"))
+		{
+			mat->flags = MATERIAL_KIND_SLIME;
+			automaticshader = qtrue;
+		}
+
+		if (strstr(name, "lava"))
+		{
+			mat->flags = MATERIAL_KIND_LAVA;
+			automaticshader = qtrue;
+		}
+
+		if (strstr(name, "comp"))
+		{
+			mat->flags = MATERIAL_KIND_SCREEN;
+			automaticshader = qtrue;
+		}
+
+		if (strstr(name, "window") || strstr(name, "wndow") || strstr(name, "wind"))
+		{
+			mat->flags = MATERIAL_KIND_WATER;
+			automaticshader = qtrue;
+		}
+
+		if (automaticshader == qtrue)
+		{
+			char const * kind = getMaterialKindName(mat->flags);
+			Com_WPrintf("Assigned automatic shader type of: %s for: %s\n", kind, name_copy);
+		}
+	}
+	/**/
 
 	return mat;
 }
