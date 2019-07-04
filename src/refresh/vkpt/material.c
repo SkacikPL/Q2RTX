@@ -504,7 +504,9 @@ pbr_material_t * MAT_FindPBRMaterial(char const * name)
 	int index = table->num_materials + table->num_custom_materials;
 	table->num_custom_materials++;
 	pbr_material_t * mat = &table->materials[index];
+
 	MAT_Reset(mat, index);
+
 	strcpy(mat->name, name_copy);
 	Com_Printf("Created a material entry %d for unknown material %s\n", index, name_copy);
 
@@ -513,45 +515,54 @@ pbr_material_t * MAT_FindPBRMaterial(char const * name)
 	{
 		if (strstr(name, "water") || strstr(name, "wtr") || strstr(name, "wter") || strstr(name, "mud") || strstr(name, "redfield") || strstr(name, "yelfield"))
 		{
-			mat->flags = MATERIAL_KIND_WATER;
+			mat->flags = MATERIAL_FLAG_CORRECT_ALBEDO + MAT_SetKind(mat->flags, MATERIAL_KIND_WATER);
 			automaticshader = qtrue;
 		}
 
 		if (strstr(name, "sky"))
 		{
-			mat->flags = MATERIAL_KIND_SKY;
+			mat->flags = MATERIAL_FLAG_CORRECT_ALBEDO + MAT_SetKind(mat->flags, MATERIAL_KIND_SKY);
 			automaticshader = qtrue;
 		}
 
-		if (strstr(name, "sewer"))
+		if (strstr(name, "sewer") && !strstr(name, "dor") && !strstr(name, "wal"))
 		{
-			mat->flags = MATERIAL_KIND_SLIME;
+			mat->flags = MATERIAL_FLAG_CORRECT_ALBEDO + MAT_SetKind(mat->flags, MATERIAL_KIND_SLIME);
 			automaticshader = qtrue;
 		}
 
-		if (strstr(name, "lava"))
+		if (strstr(name, "lava") && !strstr(name, "skin"))
 		{
-			mat->flags = MATERIAL_KIND_LAVA;
+			mat->flags = MATERIAL_FLAG_CORRECT_ALBEDO + MAT_SetKind(mat->flags, MATERIAL_KIND_LAVA);
 			automaticshader = qtrue;
 		}
 
 		if (strstr(name, "comp"))
 		{
-			mat->flags = MATERIAL_KIND_SCREEN;
+			mat->flags = MATERIAL_FLAG_CORRECT_ALBEDO + MAT_SetKind(mat->flags, MATERIAL_KIND_SCREEN);
 			automaticshader = qtrue;
 		}
 
 		if (strstr(name, "window") || strstr(name, "wndow") || strstr(name, "wind"))
 		{
-			mat->flags = MATERIAL_KIND_WATER;
+			mat->flags = MATERIAL_FLAG_CORRECT_ALBEDO + MAT_SetKind(mat->flags, MATERIAL_KIND_GLASS);
 			automaticshader = qtrue;
 		}
 
-		if (automaticshader == qtrue)
+		if (strstr(name, "light") && strstr(name, "skin") && !strstr(name, "lightning"))
 		{
-			char const * kind = getMaterialKindName(mat->flags);
-			Com_WPrintf("Assigned automatic shader type of: %s for: %s\n", kind, name_copy);
+			mat->flags = MATERIAL_FLAG_CORRECT_ALBEDO + MATERIAL_FLAG_LIGHT;
+			automaticshader = qtrue;
 		}
+	}
+
+	if (automaticshader == qtrue)
+	{
+		mat->rough_override = -1.0;
+		mat->specular_scale = 1.0;
+		mat->emissive_scale = 1.0;
+		char const * kind = getMaterialKindName(mat->flags);
+		Com_WPrintf("Assigned automatic shader type of: %s for: %s\n", kind ? kind : "", name_copy);
 	}
 	/**/
 
