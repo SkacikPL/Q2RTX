@@ -4,7 +4,7 @@
 **Changes made:**
  - Added flashlight (can be used via bind x toggle cl_flashlight).
  - Flare gun does not consume ammo (flares also bounce now).
- - Boosted reference path tracing mode params (more frames to accumulate).
+ - Boosted reference path tracing mode params (more frames to accumulate, controlled via pt_accumulation_rendering_framenum).
  - MOTD.txt file support for coop sessions.
  - Re-enabled muzzle flashes (can be disabled via cl_muzzle_flash 0) (highly recommended to use with VSYNC enabled).
  - Support for both Ground Zero and Reckoning expansions via port from Yamagi Quake 2.
