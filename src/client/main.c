@@ -26,6 +26,7 @@ cvar_t  *rcon_address;
 cvar_t  *cl_noskins;
 cvar_t  *cl_footsteps;
 cvar_t  *cl_monsterfootsteps;
+cvar_t  *cl_laserlights;
 cvar_t  *cl_timeout;
 cvar_t  *cl_predict;
 cvar_t  *cl_gun;
@@ -2722,6 +2723,7 @@ static void CL_InitLocal(void)
     cl_gunalpha = Cvar_Get("cl_gunalpha", "1", 0);
     cl_footsteps = Cvar_Get("cl_footsteps", "1", 0);
 	cl_monsterfootsteps = Cvar_Get("cl_monsterfootsteps", "1", 0);
+	cl_laserlights = Cvar_Get("cl_laserlights", "1", 0);
     cl_footsteps->changed = cl_footsteps_changed;
     cl_noskins = Cvar_Get("cl_noskins", "0", 0);
     cl_noskins->changed = cl_noskins_changed;
@@ -3492,4 +3494,5 @@ void CL_Shutdown(void)
 
     isdown = qfalse;
 }
+
 

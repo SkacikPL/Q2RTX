@@ -26,6 +26,8 @@ extern qhandle_t cl_mod_laser;
 extern qhandle_t cl_mod_dmspot;
 extern qhandle_t cl_sfx_footsteps[4];
 
+extern cvar_t *cl_laserlights;
+
 /*
 =========================================================================
 
@@ -501,6 +503,83 @@ static int adjust_shell_fx(int renderfx)
 	return renderfx;
 }
 
+/**/
+void CL_BeamLights(int skinnum, vec3_t start, vec3_t end)
+{
+	float red, green, blue;
+
+	if (skinnum == 0xf2f2f0f0)
+	{
+		red = 0.9f;
+		green = 0.0f;
+		blue = 0.0f;
+	}
+
+	if (skinnum == 0xd0d1d2d3)
+	{
+		red = 0.0f;
+		green = 0.9f;
+		blue = 0.0f;
+	}
+
+	if (skinnum == 0xf3f3f1f1)
+	{
+		if ((rand() % 2) + 1 == 2)
+		{
+			red = 0.0f;
+			green = 0.0f;
+			blue = 0.9f;
+		}
+		else
+		{
+			red = 0.9f;
+			green = 0.9f;
+			blue = 0.9f;
+		}
+	}
+
+	if (skinnum == 0xdcdddedf)
+	{
+		red = 0.9f;
+		green = 0.9f;
+		blue = 0.0f;
+	}
+
+	if (skinnum == 0xe0e1e2e3)
+	{
+		red = 0.9f;
+		green = 0.5f;
+		blue = 0.0f;
+	}
+
+	vec3_t      move;
+	vec3_t      vec;
+	float       len;
+
+	VectorCopy(start, move);
+	VectorSubtract(end, start, vec);
+	len = VectorNormalize(vec);
+
+	float num_segments = ceilf(len / 50.f);
+	float segment_size = len / num_segments;
+
+	for (float segment = 0; segment < num_segments; segment++)
+	{
+		float offset = (segment + 0.25f) * segment_size;
+		vec3_t pos;
+		VectorMA(move, offset, vec, pos);
+
+		vec3_t dist;
+		float lenz;
+		VectorSubtract(pos, cl.refdef.vieworg, dist);
+		lenz = VectorNormalize(dist);
+
+		if (lenz < 300 && lenz != 0)
+			V_AddLightEx(pos, (int)15, red, green, blue, (int)2);
+	}
+}
+/**/
+
 /*
 ===============
 CL_AddPacketEntities
@@ -840,6 +919,12 @@ static void CL_AddPacketEntities(void)
             ent.alpha = 0.30;
             V_AddEntity(&ent);
         }
+
+
+		if ( ((renderfx & RF_BEAM) && (renderfx & RF_TRANSLUCENT)) && cl_laserlights->integer)
+		{
+			CL_BeamLights(s1->skinnum, s1->origin, s1->old_origin);
+		}
 
         // add automatic particle trails
         if (effects & ~EF_ROTATE) {
