@@ -53,7 +53,6 @@ cvar_t *cvar_pt_caustics = NULL;
 cvar_t *cvar_pt_enable_nodraw = NULL;
 cvar_t *cvar_pt_assign_unknown_shaders = NULL;
 cvar_t *cvar_pt_accumulation_rendering = NULL;
-cvar_t *cvar_pt_accumulation_rendering_framenum = NULL;
 cvar_t *cvar_pt_projection = NULL;
 extern cvar_t *scr_viewsize;
 extern cvar_t *cvar_bloom_enable;
@@ -1817,7 +1816,7 @@ evaluate_reference_mode(reference_mode_t* ref_mode)
 		num_accumulated_frames++;
 
 		const int num_warmup_frames = 5;
-		const int num_frames_to_accumulate = cvar_pt_accumulation_rendering_framenum->integer;
+		const int num_frames_to_accumulate = NUM_REFERENCE_SAMPLES;
 
 		ref_mode->enable_accumulation = qtrue;
 		ref_mode->enable_denoiser = qfalse;
@@ -1828,6 +1827,7 @@ evaluate_reference_mode(reference_mode_t* ref_mode)
 		{
 		case 1: {
 			float percentage = powf(max(0.f, (num_accumulated_frames - num_warmup_frames) / (float)num_frames_to_accumulate), 0.5f);
+			float hud_alpha = max(0.f, min(1.f, (11.f - percentage * 10.f)));
 			if (percentage < 1.0f)
 			{
 				char text[MAX_QPATH];
@@ -1836,14 +1836,15 @@ evaluate_reference_mode(reference_mode_t* ref_mode)
 				int x = r_config.width / 4;
 				int y = r_config.height / 4 - 50;
 				R_SetScale(0.5f);
+				R_SetAlphaScale(hud_alpha);
 				R_SetColor(0xff000000u);
 				SCR_DrawStringEx(x + 1, y + 1, UI_CENTER, MAX_QPATH, text, SCR_GetFont());
 				R_SetColor(~0u);
 				SCR_DrawStringEx(x, y, UI_CENTER, MAX_QPATH, text, SCR_GetFont());
 				R_SetAlphaScale(1.f);
 			}
-			else
-				SCR_SetHudAlpha(0.f);
+
+			SCR_SetHudAlpha(hud_alpha);
 			break;
 		}
 		case 2:
@@ -1954,7 +1955,7 @@ prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 	{
 		// disable the stabilization hacks
 		ubo->pt_fake_roughness_threshold = 1.f;
-		ubo->pt_texture_lod_bias = -log2(sqrt(cvar_pt_accumulation_rendering_framenum->integer)); //Tiranasta
+		ubo->pt_texture_lod_bias = -log2(sqrt(NUM_REFERENCE_SAMPLES)); //Tiranasta
 		ubo->pt_specular_anti_flicker = 0.f;
 		ubo->pt_sun_bounce_range = 10000.f;
 	}
@@ -2433,7 +2434,6 @@ R_Init_RTX(qboolean total)
 
 	// 0 -> disabled, regular pause; 1 -> enabled; 2 -> enabled, hide GUI
 	cvar_pt_accumulation_rendering = Cvar_Get("pt_accumulation_rendering", "1", CVAR_ARCHIVE);
-	cvar_pt_accumulation_rendering_framenum = Cvar_Get("pt_accumulation_rendering_framenum", "10000", 0);
 
 	// 0 -> perspective, 1 -> cylindrical
 	cvar_pt_projection = Cvar_Get("pt_projection", "0", CVAR_ARCHIVE);
