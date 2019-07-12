@@ -534,7 +534,7 @@ pbr_material_t * MAT_FindPBRMaterial(char const * name)
 			automaticshader = qtrue;
 		}
 
-		if (strstr(just_name + 1, "lava") && !strstr(just_name + 1, "skin") && !strstr(just_name + 1, "tlava1_4"))
+		if (strstr(just_name + 1, "lava") && !strstr(just_name + 1, "skin") && !strstr(just_name + 1, "flr") && !strstr(just_name + 1, "tlava1_4") && !strstr(just_name + 1, "dec") && !strstr(just_name + 1, "sgn") && !strstr(just_name + 1, "wal"))
 		{
 			mat->flags = MATERIAL_FLAG_CORRECT_ALBEDO + MAT_SetKind(mat->flags, MATERIAL_KIND_LAVA);
 			automaticshader = qtrue;
@@ -546,7 +546,7 @@ pbr_material_t * MAT_FindPBRMaterial(char const * name)
 			automaticshader = qtrue;
 		}
 
-		if (strstr(just_name + 1, "window") || strstr(just_name + 1, "wndow") || strstr(just_name + 1, "wind"))
+		if (strstr(just_name + 1, "window") || strstr(just_name + 1, "wndow") || strstr(just_name + 1, "wind") || strstr(just_name + 1, "glass"))
 		{
 			mat->flags = MATERIAL_FLAG_CORRECT_ALBEDO + MAT_SetKind(mat->flags, MATERIAL_KIND_GLASS);
 			automaticshader = qtrue;
