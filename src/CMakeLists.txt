@@ -447,6 +447,120 @@ SET(HEADERS_ACTION
 	action/q_shared.h
 )
 
+SET(SRC_SMD
+	smd/g_ai.c
+	smd/g_camera.c
+	smd/g_chase.c
+	smd/g_cmds.c
+	smd/g_combat.c
+	smd/g_crane.c
+	smd/g_fog.c
+	smd/g_func.c
+	smd/g_items.c
+	smd/g_jetpack.c
+	smd/g_lights.c
+	smd/g_lock.c
+	smd/g_main.c
+	smd/g_misc.c
+	smd/g_model.c
+	smd/g_monster.c
+	smd/g_mtrain.c
+	smd/g_monster.c
+	smd/g_newai.c
+	smd/g_patchplayermodels.c
+	smd/g_pendulum.c
+	smd/g_phys.c
+	smd/g_reflect.c
+	smd/g_save.c
+	smd/g_sound.c
+	smd/g_spawn.c
+	smd/g_splinetrain.c
+	smd/g_svcmds.c
+	smd/g_target.c
+	smd/g_thing.c
+	smd/g_tracktrain.c
+	smd/g_trigger.c
+	smd/g_turret.c
+	smd/g_utils.c
+	smd/g_vehicle.c
+	smd/g_weapon.c
+	smd/g_wes.c
+	smd/m_actor.c
+	smd/m_actor_weap.c
+	smd/m_berserk.c
+	smd/m_boss2.c
+	smd/m_boss3.c
+	smd/m_boss31.c
+	smd/m_boss32.c
+	smd/m_brain.c
+	smd/m_chick.c
+	smd/m_flash.c
+	smd/m_flipper.c
+	smd/m_float.c
+	smd/m_flyer.c
+	smd/m_gladiator.c
+	smd/m_gunner.c
+	smd/m_hover.c
+	smd/m_infantry.c
+	smd/m_insane.c
+	smd/m_medic.c
+	smd/m_move.c
+	smd/m_mutant.c
+	smd/m_parasite.c
+	smd/m_sentrybot.c
+	smd/m_soldier.c
+	smd/m_supertank.c
+	smd/m_tank.c
+	smd/majbitch.c
+	smd/p_chase.c
+	smd/p_client.c
+	smd/p_hud.c
+	smd/p_menu.c
+	smd/p_text.c
+	smd/p_trail.c
+	smd/p_view.c
+	smd/p_weapon.c
+	smd/q_shared.c
+)
+
+SET(HEADERS_SMD
+	smd/fmod.h
+	smd/g_func_decs.h
+	smd/g_func_list.h
+	smd/g_local.h
+	smd/g_mmove_decs.h
+	smd/g_mmove_list.h
+	smd/m_actor.h
+	smd/m_berserk.h
+	smd/m_boss2.h
+	smd/m_boss31.h
+	smd/m_boss32.h
+	smd/m_brain.h
+	smd/m_chick.h
+	smd/m_flipper.h
+	smd/m_float.h
+	smd/m_flyer.h
+	smd/m_gladiator.h
+	smd/m_gunner.h
+	smd/m_hover.h
+	smd/m_infantry.h
+	smd/m_insane.h
+	smd/m_medic.h
+	smd/m_mutant.h
+	smd/m_parasite.h
+	smd/m_player.h
+	smd/m_rider.h
+	smd/m_soldier.h
+	smd/m_supertank.h
+	smd/m_tank.h
+	smd/p_menu.h
+	smd/p_text.h
+	smd/pak.h
+	smd/q_shared.h
+	smd/resource.h
+)
+
+
 
 SET(SRC_CLIENT
 	client/ascii.c
@@ -734,6 +848,7 @@ ADD_LIBRARY(gamex86_xatrix SHARED ${SRC_XATRIX} ${HEADERS_XATRIX})
 ADD_LIBRARY(gamex86_rogue SHARED ${SRC_ROGUE} ${HEADERS_ROGUE})
 ADD_LIBRARY(gamex86_zaero SHARED ${SRC_ZAERO} ${HEADERS_ZAERO})
 ADD_LIBRARY(gamex86_action SHARED ${SRC_ACTION} ${HEADERS_ACTION})
+ADD_LIBRARY(gamex86_smd SHARED ${SRC_SMD} ${HEADERS_SMD})
 
 IF(WIN32)
 ADD_EXECUTABLE(client WIN32 
@@ -821,6 +936,8 @@ SOURCE_GROUP("zaero\\sources" FILES ${SRC_ZAERO})
 SOURCE_GROUP("zaero\\headers" FILES ${HEADERS_ZAERO})
 SOURCE_GROUP("action\\sources" FILES ${SRC_ACTION})
 SOURCE_GROUP("action\\headers" FILES ${HEADERS_ACTION})
+SOURCE_GROUP("smd\\sources" FILES ${SRC_SMD})
+SOURCE_GROUP("smd\\headers" FILES ${HEADERS_SMD})
 SOURCE_GROUP("client\\sources" FILES ${SRC_CLIENT})
 SOURCE_GROUP("client\\headers" FILES ${HEADERS_CLIENT})
 SOURCE_GROUP("server\\sources" FILES ${SRC_SERVER})
@@ -842,6 +959,7 @@ IF (WIN32)
 	TARGET_INCLUDE_DIRECTORIES(gamex86_rogue PRIVATE ../VC/inc)
 	TARGET_INCLUDE_DIRECTORIES(gamex86_zaero PRIVATE ../VC/inc)
 	TARGET_INCLUDE_DIRECTORIES(gamex86_action PRIVATE ../VC/inc)
+	TARGET_INCLUDE_DIRECTORIES(gamex86_smd PRIVATE ../VC/inc)
 	TARGET_SOURCES(gamex86_baseq2 PRIVATE windows/res/baseq2.rc)
 
 	TARGET_LINK_LIBRARIES(client winmm ws2_32)
@@ -858,6 +976,7 @@ IF (WIN32)
 	target_compile_options(gamex86_rogue PRIVATE /wd4005 /wd4996)
 	target_compile_options(gamex86_zaero PRIVATE /wd4005 /wd4996)
 	target_compile_options(gamex86_action PRIVATE /wd4005 /wd4996)
+	target_compile_options(gamex86_smd PRIVATE /wd4005 /wd4996)
 ENDIF()
 
 TARGET_INCLUDE_DIRECTORIES(gamex86_baseq2 PRIVATE ../inc)
@@ -865,6 +984,7 @@ TARGET_INCLUDE_DIRECTORIES(gamex86_xatrix PRIVATE ../inc)
 TARGET_INCLUDE_DIRECTORIES(gamex86_rogue PRIVATE ../inc)
 TARGET_INCLUDE_DIRECTORIES(gamex86_zaero PRIVATE ../inc)
 TARGET_INCLUDE_DIRECTORIES(gamex86_action PRIVATE ../inc)
+TARGET_INCLUDE_DIRECTORIES(gamex86_smd PRIVATE ../inc)
 
 TARGET_INCLUDE_DIRECTORIES(client PRIVATE ../inc)
 TARGET_INCLUDE_DIRECTORIES(client PRIVATE "${ZLIB_INCLUDE_DIRS}")
@@ -984,6 +1104,22 @@ SET_TARGET_PROPERTIES(gamex86_action
     DEBUG_POSTFIX ""
 )
 
+SET_TARGET_PROPERTIES(gamex86_smd
+    PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/smd"
+    LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/smd"
+    LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/smd"
+    LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/smd"
+    LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/smd"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/smd"
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/smd"
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/smd"
+    RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/smd"
+    RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/smd"
+    PREFIX ""
+    DEBUG_POSTFIX ""
+)
+
 IF(IS_64_BIT)
 	SET_TARGET_PROPERTIES(gamex86_baseq2
 		PROPERTIES
@@ -1014,6 +1150,12 @@ SET_TARGET_PROPERTIES(gamex86_action
 		LIBRARY_OUTPUT_NAME "gamex86_64"
 		RUNTIME_OUTPUT_NAME "gamex86_64"
 	)			
+	
+SET_TARGET_PROPERTIES(gamex86_smd
+		PROPERTIES
+		LIBRARY_OUTPUT_NAME "gamex86_64"
+		RUNTIME_OUTPUT_NAME "gamex86_64"
+	)		
 ENDIF()
 
 IF(CONFIG_LINUX_PACKAGING_SUPPORT)
