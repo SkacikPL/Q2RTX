@@ -417,7 +417,7 @@ void V_RenderView(void)
 			vec3_t result; //End result is Z offset of -5 + 10 units forward and 5 units to the right of current view point.
 
 			VectorAdd(cl.refdef.vieworg, flashlight_offset, result);
-			VectorMA(result, 10, cl.v_forward, result);
+			VectorMA(result, 15, cl.v_forward, result);
 			VectorMA(result, 5, cl.v_right, result);
 
 			V_AddLightEx(result, (int)30, 0.7f, 0.7f, 0.7f, (int)4); //Spawn light every frame at given coordinates.
