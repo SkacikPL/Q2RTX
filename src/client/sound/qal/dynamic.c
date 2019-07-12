@@ -206,7 +206,10 @@ qboolean QAL_Init(void)
 		qalcGetIntegerv(device, ALC_HRTF_SOFT, 1, &enabled);
 		qalcGetIntegerv(device, ALC_HRTF_STATUS_SOFT, 1, &status);
 
-		Com_Printf("HRTF enabled: %i\n", enabled);
+		if ((int)enabled == 1)
+			Com_Printf("HRTF enabled: true\n");
+		else
+			Com_Printf("HRTF enabled: false\n");
 
 		if ((int)status == 0)
 		{
