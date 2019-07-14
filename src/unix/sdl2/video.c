@@ -50,6 +50,7 @@ static vidFlags_t       sdl_flags;
 extern cvar_t *vid_fullscreen_exclusive_w;
 extern cvar_t *vid_fullscreen_exclusive_h;
 extern cvar_t *vid_fullscreen_exclusive_refresh;
+extern cvar_t *r_forcelowpower;
 
 /*
 ===============================================================================
@@ -233,8 +234,13 @@ static void VID_SDL_SetMode(void)
             };
             SDL_SetWindowDisplayMode(sdl_window, &mode);
             flags = SDL_WINDOW_FULLSCREEN;
+			SDL_SetHint("SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS", "1");
+			SDL_SetHint("SDL_ALLOW_TOPMOST", "1");
         } else {
             flags = SDL_WINDOW_FULLSCREEN_DESKTOP;
+			flags += SDL_WINDOW_BORDERLESS;
+			SDL_SetHint("SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS", "0");
+			SDL_SetHint("SDL_ALLOW_TOPMOST", "0");
         }
     } else {
         if (VID_GetGeometry(&rc)) {
@@ -531,15 +537,36 @@ static void window_event(SDL_WindowEvent *event)
     case SDL_WINDOWEVENT_RESTORED:
     case SDL_WINDOWEVENT_ENTER:
     case SDL_WINDOWEVENT_LEAVE:
-    case SDL_WINDOWEVENT_FOCUS_GAINED:
+
+	case SDL_WINDOWEVENT_FOCUS_GAINED:
+		Cvar_Set("cl_paused", "0");
+		r_forcelowpower->integer = 0;
+		CL_UpdateFrameTimes();
+		OGG_TogglePlayback();
+		CL_Activate(ACT_ACTIVATED);
+		break;
+
     case SDL_WINDOWEVENT_FOCUS_LOST:
         if (flags & (SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS)) {
-            active = ACT_ACTIVATED;
+			active = ACT_ACTIVATED;
         } else if (flags & SDL_WINDOW_MINIMIZED) {
             active = ACT_MINIMIZED;
         } else {
             active = ACT_RESTORED;
         }
+
+		if (active == ACT_ACTIVATED || active == ACT_MINIMIZED)
+		{
+			if (!cl_paused->integer)
+			{
+				Cvar_Set("cl_paused", "1");
+				OGG_TogglePlayback();
+			}
+			r_forcelowpower->integer = 1;
+			CL_UpdateFrameTimes();
+			S_StopAllSounds();
+		}
+
         CL_Activate(active);
         break;
 
@@ -759,3 +786,4 @@ void VID_FillInputAPI(inputAPI_t *api)
     api->GetEvents = NULL;
     api->GetMotion = GetMouseMotion;
 }
+
