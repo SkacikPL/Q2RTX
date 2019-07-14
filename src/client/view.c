@@ -53,7 +53,7 @@ static cvar_t   *cl_adjustfov;
 Flashlight addition, this is not the ideal solution as the cvar is config bound rather than per save,
 however it works and perf impact doesn't seem to be too big. Great solution for darker parts of the level and unofficial/expansion maps.
 */
-static cvar_t	*cl_flashlight; //add new CVar for toggling flashlight on/off.
+cvar_t	*cl_flashlight; //add new CVar for toggling flashlight on/off.
 const vec3_t flashlight_offset = { 0,0,-5 }; //Only define Z as it's always going to be accurate.
 
 #if USE_DLIGHTS
@@ -414,7 +414,7 @@ void V_RenderView(void)
 
 		if (cl_flashlight->integer) //Do this stuff only if cl_flashlight is 1
 		{
-			vec3_t result; //End result is Z offset of -5 + 10 units forward and 5 units to the right of current view point.
+			vec3_t result; //End result is Z offset of -5 + 15 units forward and 5 units to the right of current view point.
 
 			VectorAdd(cl.refdef.vieworg, flashlight_offset, result);
 			VectorMA(result, 15, cl.v_forward, result);
@@ -544,15 +544,15 @@ static void cl_add_blend_changed(cvar_t *self)
 
 static void cl_flashlight_changed(cvar_t *self) //Have prompt and sound when toggled.
 {
-	//custom flt_on.wav / flt_off.wav (22KHz/mono) can be added manually to pak0.pak sound\misc\ using Pak Explorer (http://www.quaketerminus.com/tools.shtml)
+	
 	if (cl_flashlight->integer)
 	{
-		Com_Printf("Flashlight ON \n");
+		Com_Printf("Flashlight ON\n");
 		S_StartLocalSound("misc/flt_on.wav"); //Specific custom ON sound, not present by default (can be added manually).
 	}
 	else
 	{
-		Com_Printf("Flashlight OFF \n");
+		Com_Printf("Flashlight OFF\n");
 		S_StartLocalSound("misc/flt_off.wav"); //Specific custom Off sound, not present by default (can be added manually).
 	}
 	//S_StartLocalSound("misc/menu3.wav");  //Generic ON/OFF sound, uncomment to play on each toggle.
