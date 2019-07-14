@@ -26,6 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define SAVE_AUTO       "save0"
 
 cvar_t *sv_savedir = NULL;
+cvar_t	*cl_flashlight;
 
 
 static int write_server_file(qboolean autosave)
@@ -54,9 +55,9 @@ static int write_server_file(qboolean autosave)
     // write all CVAR_LATCH cvars
     // these will be things like coop, skill, deathmatch, etc
     for (var = cvar_vars; var; var = var->next) {
-        if (!(var->flags & CVAR_LATCH))
+        if (!(var->flags & CVAR_LATCH) && var != cl_flashlight)
             continue;
-        if (var->flags & CVAR_PRIVATE)
+        if (var->flags & CVAR_PRIVATE && var != cl_flashlight)
             continue;
         MSG_WriteString(var->name);
         MSG_WriteString(var->string);
@@ -363,6 +364,7 @@ static int read_server_file(void)
 
     // read all CVAR_LATCH cvars
     // these will be things like coop, skill, deathmatch, etc
+	Cvar_Set("cl_flashlight", "0");
     while (1) {
         len = MSG_ReadString(name, MAX_QPATH);
         if (!len)
