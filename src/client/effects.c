@@ -859,7 +859,7 @@ void FX_Init(void)
 {
     cvar_pt_particle_emissive = Cvar_Get("pt_particle_emissive", "10.0", 0);
 	cl_particle_num_factor = Cvar_Get("cl_particle_num_factor", "1", 0);
-	cl_muzzle_flash = Cvar_Get("cl_muzzle_flash", "1", 0); //Add new CVar for enabling/disabling muzzle flashes.
+	cl_muzzle_flash = Cvar_Get("cl_muzzle_flash", "1", CVAR_ARCHIVE); //Add new CVar for enabling/disabling muzzle flashes.
 }
 
 static void CL_ClearParticles(void)
