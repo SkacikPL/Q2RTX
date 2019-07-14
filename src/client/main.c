@@ -25,6 +25,7 @@ cvar_t  *rcon_address;
 
 cvar_t  *cl_noskins;
 cvar_t  *cl_footsteps;
+cvar_t  *cl_jumpsound;
 cvar_t  *cl_monsterfootsteps;
 cvar_t  *cl_laserlights;
 cvar_t  *cl_timeout;
@@ -34,6 +35,7 @@ cvar_t  *cl_gunalpha;
 cvar_t  *cl_maxfps;
 cvar_t  *cl_async;
 cvar_t  *r_maxfps;
+cvar_t  *r_forcelowpower;
 cvar_t  *cl_autopause;
 
 cvar_t  *cl_kickangles;
@@ -806,6 +808,7 @@ void CL_Disconnect(error_type_t type)
     CL_CheckForPause();
 
     CL_UpdateFrameTimes();
+	OGG_Stop();
 }
 
 /*
@@ -2722,8 +2725,9 @@ static void CL_InitLocal(void)
     //
     cl_gunalpha = Cvar_Get("cl_gunalpha", "1", 0);
     cl_footsteps = Cvar_Get("cl_footsteps", "1", 0);
-	cl_monsterfootsteps = Cvar_Get("cl_monsterfootsteps", "1", 0);
-	cl_laserlights = Cvar_Get("cl_laserlights", "1", 0);
+	cl_jumpsound = Cvar_Get("cl_jumpsound", "1", CVAR_ARCHIVE);
+	cl_monsterfootsteps = Cvar_Get("cl_monsterfootsteps", "1", CVAR_ARCHIVE);
+	cl_laserlights = Cvar_Get("cl_laserlights", "1", CVAR_ARCHIVE);
     cl_footsteps->changed = cl_footsteps_changed;
     cl_noskins = Cvar_Get("cl_noskins", "0", 0);
     cl_noskins->changed = cl_noskins_changed;
@@ -2735,6 +2739,7 @@ static void CL_InitLocal(void)
     cl_async = Cvar_Get("cl_async", "1", 0);
     cl_async->changed = cl_sync_changed;
     r_maxfps = Cvar_Get("r_maxfps", "0", 0);
+	r_forcelowpower = Cvar_Get("r_forcelowpower", "0", CVAR_ROM);
     r_maxfps->changed = cl_sync_changed;
     cl_autopause = Cvar_Get("cl_autopause", "1", 0);
     cl_rollhack = Cvar_Get("cl_rollhack", "1", 0);
@@ -3132,11 +3137,15 @@ void CL_UpdateFrameTimes(void)
         // timedemo just runs at full speed
         ref_msec = phys_msec = main_msec = 0;
         sync_mode = SYNC_FULL;
-    } else if (cls.active == ACT_MINIMIZED) {
-        // run at 10 fps if minimized
-        ref_msec = phys_msec = 0;
-        main_msec = fps_to_msec(10);
-        sync_mode = SYNC_SLEEP_10;
+	}
+	else if (cls.active == ACT_MINIMIZED) {
+		// run at 10 fps if minimized
+		ref_msec = phys_msec = 0;
+		main_msec = fps_to_msec(10);
+		sync_mode = SYNC_SLEEP_10;
+	}else if (r_forcelowpower->integer == 1) {
+		ref_msec = fps_to_msec(10);
+		sync_mode = ASYNC_MAXFPS;
     } else if (cls.active == ACT_RESTORED || cls.state != ca_active) {
         // run at 60 fps if not active //Actually run menus at 200 fps and sync to max fps / refresh rate
         ref_msec = phys_msec = 0;
