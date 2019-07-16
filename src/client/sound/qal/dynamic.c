@@ -245,11 +245,11 @@ qboolean QAL_Init(void)
 	inputdevice = qalcCaptureOpenDevice(NULL, SRATE, AL_FORMAT_STEREO16, SSIZE);
 	if (inputdevice)
 	{
-		Com_Printf("Detected sound capture device: %s!\n", qalcGetString(inputdevice, ALC_ALL_DEVICES_SPECIFIER));
+		Com_Printf("Detected default audio capture device: %s\n", qalcGetString(inputdevice, ALC_ALL_DEVICES_SPECIFIER));
 	}
 	else
 	{
-		Com_Printf("Could not detect default sound capture device!\n");
+		Com_Printf("Could not detect default audio capture device!\n");
 	}
 
 
