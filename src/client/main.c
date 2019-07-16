@@ -20,9 +20,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "client.h"
 #include "client/sound/vorbis.h"
+#include <curl/curl.h>
 
 cvar_t  *rcon_address;
 
+cvar_t  *motd;
+cvar_t  *firstrun;
+cvar_t  *showmotd;
 cvar_t  *cl_noskins;
 cvar_t  *cl_footsteps;
 cvar_t  *cl_jumpsound;
@@ -106,6 +110,8 @@ centity_t   cl_entities[MAX_EDICTS];
 // used for executing stringcmds
 cmdbuf_t    cl_cmdbuf;
 char        cl_cmdbuf_text[MAX_STRING_CHARS];
+
+qboolean updateavailable;
 
 //======================================================================
 
@@ -2633,6 +2639,36 @@ static void cl_chat_sound_changed(cvar_t *self)
         self->integer = 1;
 }
 
+struct string {
+	char *ptr;
+	size_t len;
+};
+
+void init_string(struct string *s) {
+	s->len = 0;
+	s->ptr = malloc(s->len + 1);
+	if (s->ptr == NULL) {
+		fprintf(stderr, "malloc() failed\n");
+		exit(EXIT_FAILURE);
+	}
+	s->ptr[0] = '\0';
+}
+
+size_t writefunc(void *ptr, size_t size, size_t nmemb, struct string *s)
+{
+	size_t new_len = s->len + size * nmemb;
+	s->ptr = realloc(s->ptr, new_len + 1);
+	if (s->ptr == NULL) {
+		fprintf(stderr, "realloc() failed\n");
+		exit(EXIT_FAILURE);
+	}
+	memcpy(s->ptr + s->len, ptr, size*nmemb);
+	s->ptr[new_len] = '\0';
+	s->len = new_len;
+
+	return size * nmemb;
+}
+
 void ForkAuthor(void)
 {
 	if (WIN32)
@@ -2641,8 +2677,112 @@ void ForkAuthor(void)
 		system("xdg-open https://www.skacikpl.pl");
 }
 
+void UpdateFork(void)
+{
+	if (updateavailable == qtrue)
+	{
+		if (WIN32)
+			system("start https://github.com/SkacikPL/Q2RTX/releases");
+		else
+			system("xdg-open https://github.com/SkacikPL/Q2RTX/releases");
+	}
+	else
+		Com_Printf("There is no need to update!\n");
+}
+
+void GetMOTD(void)
+{
+	CURL *curl;
+	CURLcode res;
+
+	curl = curl_easy_init();
+	if (curl) {
+		struct string s;
+		init_string(&s);
+
+		curl_easy_setopt(curl, CURLOPT_URL, "http://www.skacikpl.pl/q2rtxmotd.txt");
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+		curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
+		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writefunc);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s);
+		res = curl_easy_perform(curl);
+
+		if (res == CURLE_OK && !strstr(s.ptr, "<"))
+		{
+			Com_Printf("\n");
+			Com_LPrintf(PRINT_TALK, "===Message Of The Day===\n");
+			Com_Printf("<*><*><*><*><*><*><*><*><*><*><*><*><*><*><*><*><*><*><*><*>\n");
+			Com_Printf("%s", s.ptr);
+			
+			if (cl.bsp)
+				SCR_CenterPrint(s.ptr);
+
+			Com_Printf("<*><*><*><*><*><*><*><*><*><*><*><*><*><*><*><*><*><*><*><*>\n");
+			Com_Printf("This message can be displayed again by typing 'motd' in console.\n");
+		}
+		else
+			Com_WPrintf("Could not retrieve MOTD!\n");
+
+		free(s.ptr);
+		curl_easy_cleanup(curl);
+		Com_Printf("You can disable MOTD by typing 'showmotd 0' in console.\n");
+	}
+}
+
+void CheckUpdate(void)
+{
+	CURL *curl;
+	CURLcode res;
+
+	curl = curl_easy_init();
+	if (curl) {
+		struct string s;
+		init_string(&s);
+
+		curl_easy_setopt(curl, CURLOPT_URL, "http://www.skacikpl.pl/q2rtxverinfo.txt");
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+		curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
+		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writefunc);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s);
+		res = curl_easy_perform(curl);
+
+		if (res == CURLE_OK && !strstr(s.ptr, "<"))
+		{
+			char *curver = _STR(VERSION_MAJOR) "." _STR(VERSION_MINOR) "." _STR(VERSION_POINT);
+			if (strstr(s.ptr, curver))
+			{
+				Com_LPrintf(PRINT_TALK, "This version is up to date!\n");
+				updateavailable = qfalse;
+			}
+			else
+			{
+				updateavailable = qtrue;
+				S_StartLocalSound("misc/talk1.wav");
+				Com_EPrintf("This version is outdated!\nThis version: ");
+				Com_EPrintf(curver);
+				Com_EPrintf("\nCurrent version: ");
+				Com_EPrintf(s.ptr);
+				Com_EPrintf("\nYou can type 'update' in console to open GitHub releases page.\n");
+			}
+		}
+		else
+			Com_WPrintf("Could not retrieve remote version info!\n");
+
+		Com_Printf("\n");
+		free(s.ptr);
+		curl_easy_cleanup(curl);
+	}
+}
+
 static const cmdreg_t c_client[] = {
+	{ "motd", GetMOTD},
 	{ "skacikpl", ForkAuthor},
+	{ "update", UpdateFork},
+	{ "checkupdate", CheckUpdate},
     { "cmd", CL_ForwardToServer_f },
     { "pause", CL_Pause_f },
     { "pingservers", CL_PingServers_f },
@@ -2729,7 +2869,9 @@ static void CL_InitLocal(void)
 	cl_monsterfootsteps = Cvar_Get("cl_monsterfootsteps", "1", CVAR_ARCHIVE);
 	cl_laserlights = Cvar_Get("cl_laserlights", "1", CVAR_ARCHIVE);
     cl_footsteps->changed = cl_footsteps_changed;
-    cl_noskins = Cvar_Get("cl_noskins", "0", 0);
+	showmotd = Cvar_Get("showmotd", "1", CVAR_ARCHIVE);
+	firstrun = Cvar_Get("firstrun", "1", CVAR_ARCHIVE);
+	cl_noskins = Cvar_Get("cl_noskins", "0", 0);
     cl_noskins->changed = cl_noskins_changed;
     cl_predict = Cvar_Get("cl_predict", "1", 0);
     cl_predict->changed = cl_predict_changed;
@@ -3451,13 +3593,32 @@ void CL_Init(void)
     cl_cmdbuf.exec = exec_server_string;
 
     Cvar_Set("cl_running", "1");
-	Com_Printf("  .--.      .-'.      .--.      .--.      .--.      .--.      .`-.      .--.\n");
-	Com_Printf(":::::.\\::::::::.\\::::::::.\\::::::::.\\::::::::.\\::::::::.\\::::::::.\\::::::::.\\ \n");
-	Com_Printf("'      `--'      `.-'      `--'      `--'      `--'      `-.'      `--'      `\n");
-	Com_Printf("Quake 2 RTX\nCustom build by SkacikPL\nhttps://www.skacikpl.pl\nType skacikpl in console to visit.\n");
-	Com_Printf("  .--.      .-'.      .--.      .--.      .--.      .--.      .`-.      .--.\n");
-	Com_Printf(":::::.\\::::::::.\\::::::::.\\::::::::.\\::::::::.\\::::::::.\\::::::::.\\::::::::.\\ \n");
-	Com_Printf("'      `--'      `.-'      `--'      `--'      `--'      `-.'      `--'      `\n");
+	
+	Com_Printf("\n");
+	Com_LPrintf(PRINT_NOTICE, "  .--.      .-'.      .--.      .--.      .--.      .--.      .`-.      .--.\n");
+	Com_LPrintf(PRINT_NOTICE, ":::::.\\::::::::.\\::::::::.\\::::::::.\\::::::::.\\::::::::.\\::::::::.\\::::::::.\\ \n");
+	Com_LPrintf(PRINT_NOTICE, "'      `--'      `.-'      `--'      `--'      `--'      `-.'      `--'      `\n");
+	Com_LPrintf(PRINT_NOTICE, "Quake II RTX\nCustom build by SkacikPL\nhttps://www.skacikpl.pl\nType skacikpl in console to visit.\n");
+	Com_LPrintf(PRINT_NOTICE, "  .--.      .-'.      .--.      .--.      .--.      .--.      .`-.      .--.\n");
+	Com_LPrintf(PRINT_NOTICE, ":::::.\\::::::::.\\::::::::.\\::::::::.\\::::::::.\\::::::::.\\::::::::.\\::::::::.\\ \n");
+	Com_LPrintf(PRINT_NOTICE, "'      `--'      `.-'      `--'      `--'      `--'      `-.'      `--'      `\n");
+	Com_Printf("\n");
+
+	if (firstrun->integer)
+	{
+		Com_WPrintf("PLEASE READ:\n");
+		Com_WPrintf("This build estabilishes a connection to a remote server located at https://www.skacikpl.pl to fetch most recent version info.\n");
+		Com_WPrintf("This is one time message displayed on first boot.\n");
+		Cvar_Set("firstrun", "0");
+	}
+
+	if (showmotd->integer)
+	{
+		GetMOTD();
+		Com_Printf("\n");
+	}
+
+	CheckUpdate();
 }
 
 /*
