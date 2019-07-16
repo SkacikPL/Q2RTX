@@ -1053,8 +1053,9 @@ void Qcommon_Init(int argc, char **argv)
 
     Com_AddConfigFile(COM_POSTINIT_CFG, FS_TYPE_REAL);
 
-    Com_Printf("====== " PRODUCT " initialized ======\n\n");
-    Com_LPrintf(PRINT_NOTICE, APPLICATION " " VERSION_STRING ", " __DATE__ "\n");
+    //Com_Printf("====== " PRODUCT " initialized ======\n\n");
+	Com_LPrintf(PRINT_NOTICE, "====== " PRODUCT " initialized ======\n\n");
+    Com_LPrintf(PRINT_TALK, APPLICATION "(SkacikPL fork) " _STR(VERSION_MAJOR) "." _STR(VERSION_MINOR) "." _STR(VERSION_POINT) ", " __DATE__ "\n");
 
 	if (fs_shareware->integer)
 	{

@@ -644,11 +644,12 @@ create_command_pool_and_fences()
 qboolean
 init_vulkan()
 {
-	Com_Printf("----- init_vulkan -----\n");
+	//Com_Printf("----- init_vulkan -----\n");
+	Com_LPrintf(PRINT_NOTICE, "----- init_vulkan -----\n");
 
 	/* layers */
 	get_vk_layer_list(&qvk.num_layers, &qvk.layers);
-	Com_Printf("Available Vulkan layers: \n");
+	Com_LPrintf(PRINT_TALK, "Available Vulkan layers: \n");
 	for(int i = 0; i < qvk.num_layers; i++) {
 		int requested = layer_requested(qvk.layers[i].layerName);
 		Com_Printf("  %s%s\n", qvk.layers[i].layerName, requested ? " (requested)" : "");
@@ -667,7 +668,7 @@ init_vulkan()
 		return qfalse;
 	}
 
-	Com_Printf("Vulkan instance extensions required by SDL2: \n");
+	Com_LPrintf(PRINT_TALK, "Vulkan instance extensions required by SDL2: \n");
 	for (int i = 0; i < qvk.num_sdl2_extensions; i++) {
 		Com_Printf("  %s\n", qvk.sdl2_extensions[i]);
 	}
@@ -678,7 +679,7 @@ init_vulkan()
 	memcpy(ext + qvk.num_sdl2_extensions, vk_requested_instance_extensions, sizeof(vk_requested_instance_extensions));
 
 	get_vk_extension_list(NULL, &qvk.num_extensions, &qvk.extensions); /* valid here? */
-	Com_Printf("Supported Vulkan instance extensions: \n");
+	Com_LPrintf(PRINT_TALK, "Supported Vulkan instance extensions: \n");
 	for(int i = 0; i < qvk.num_extensions; i++) {
 		int requested = 0;
 		for(int j = 0; j < num_inst_ext_combined; j++) {
@@ -782,15 +783,15 @@ init_vulkan()
 		vkGetPhysicalDeviceProperties(devices[i], &dev_properties);
 		vkGetPhysicalDeviceFeatures  (devices[i], &dev_features);
 
-		Com_Printf("Physical device %d: %s\n", i, dev_properties.deviceName);
-		Com_Printf("Max number of allocations: %d\n", dev_properties.limits.maxMemoryAllocationCount);
+		Com_LPrintf(PRINT_TALK, "Physical device %d: %s\n", i, dev_properties.deviceName);
+		Com_LPrintf(PRINT_TALK, "Max number of allocations: %d\n", dev_properties.limits.maxMemoryAllocationCount);
 		uint32_t num_ext;
 		vkEnumerateDeviceExtensionProperties(devices[i], NULL, &num_ext, NULL);
 
 		VkExtensionProperties *ext_properties = alloca(sizeof(VkExtensionProperties) * num_ext);
 		vkEnumerateDeviceExtensionProperties(devices[i], NULL, &num_ext, ext_properties);
 
-		Com_Printf("Supported Vulkan device extensions:\n");
+		Com_LPrintf(PRINT_TALK, "Supported Vulkan device extensions:\n");
 		for(int j = 0; j < num_ext; j++) {
 			Com_Printf("  %s\n", ext_properties[j].extensionName);
 			if(!strcmp(ext_properties[j].extensionName, VK_NV_RAY_TRACING_EXTENSION_NAME)) {
@@ -810,7 +811,7 @@ init_vulkan()
 		VkPhysicalDeviceProperties dev_properties;
 		vkGetPhysicalDeviceProperties(devices[picked_device], &dev_properties);
 
-		Com_Printf("Picked physical device %d: %s\n", picked_device, dev_properties.deviceName);
+		Com_LPrintf(PRINT_TALK, "Picked physical device %d: %s\n", picked_device, dev_properties.deviceName);
 
 #ifdef _WIN32
 		if (dev_properties.vendorID == 0x10de) // NVIDIA vendor ID
@@ -818,7 +819,12 @@ init_vulkan()
 			uint32_t driver_major = (dev_properties.driverVersion >> 22) & 0x3ff;
 			uint32_t driver_minor = (dev_properties.driverVersion >> 14) & 0xff;
 
-			Com_Printf("NVIDIA GPU detected. Driver version: %u.%02u\n", driver_major, driver_minor);
+			Com_LPrintf(PRINT_TALK, "NVIDIA GPU detected. Driver version: %u.%02u\n", driver_major, driver_minor);
+
+			if (!strstr(dev_properties.deviceName, " RTX "))
+				Com_WPrintf("No RTX GPU detected, expect low performance!\n");
+			else
+				Com_LPrintf(PRINT_TALK, "RTX GPU detected, optimal performance should be expected at 1080p.\n");
 
 			uint32_t required_major = 0;
 			uint32_t required_minor = 0;
@@ -1008,11 +1014,12 @@ init_vulkan()
 
 #define _VK_EXTENSION_DO(a) \
 		q##a = (PFN_##a) vkGetDeviceProcAddr(qvk.device, #a); \
-		if(!q##a) { Com_EPrintf("warning: could not load function %s\n", #a); }
+		if(!q##a && #a != "vkDebugMarkerSetObjectNameEXT") { Com_EPrintf("warning: could not load function %s\n", #a); }
 	_VK_EXTENSION_LIST
 #undef _VK_EXTENSION_DO
 
-	Com_Printf("-----------------------\n");
+	//Com_Printf("-----------------------\n");
+		Com_LPrintf(PRINT_NOTICE, "-----------------------\n");
 
 	return qtrue;
 }
@@ -2385,7 +2392,8 @@ R_EndFrame_RTX(void)
 void
 R_ModeChanged_RTX(int width, int height, int flags, int rowbytes, void *pixels)
 {
-	Com_Printf("mode changed %d %d\n", width, height);
+	if(cl.bsp)
+		Com_Printf("mode changed %d %d\n", width, height);
 
 	r_config.width  = width;
 	r_config.height = height;

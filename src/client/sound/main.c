@@ -193,7 +193,8 @@ void S_Init(void)
         return;
     }
 
-    Com_Printf("------- S_Init -------\n");
+    //Com_Printf("------- S_Init -------\n");
+	Com_LPrintf(PRINT_NOTICE, "------- S_Init -------\n");
 
     s_volume = Cvar_Get("s_volume", "0.7", CVAR_ARCHIVE);
 	s_doppler = Cvar_Get("s_doppler", "1", CVAR_ARCHIVE);
@@ -254,7 +255,8 @@ void S_Init(void)
 
 fail:
     Cvar_SetInteger(s_enable, s_started, FROM_CODE);
-    Com_Printf("----------------------\n");
+    //Com_Printf("----------------------\n");
+	Com_LPrintf(PRINT_NOTICE, "----------------------\n");
 }
 
 

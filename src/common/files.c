@@ -3713,7 +3713,8 @@ FS_Init
 */
 void FS_Init(void)
 {
-    Com_Printf("------- FS_Init -------\n");
+    //Com_Printf("------- FS_Init -------\n");
+	Com_LPrintf(PRINT_NOTICE, "------- FS_Init -------\n");
 
     List_Init(&fs_hard_links);
     List_Init(&fs_soft_links);
@@ -3731,6 +3732,7 @@ void FS_Init(void)
     fs_game->changed = fs_game_changed;
     fs_game_changed(fs_game);
 
-    Com_Printf("-----------------------\n");
+    //Com_Printf("-----------------------\n");
+	Com_LPrintf(PRINT_NOTICE, "-----------------------\n");
 }
 
