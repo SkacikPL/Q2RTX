@@ -1421,6 +1421,8 @@ static void MVD_Commands_f(mvd_client_t *client)
                    );
 }
 
+extern cvar_t *cl_flashlight;
+
 static void MVD_GameClientCommand(edict_t *ent)
 {
     mvd_client_t *client = EDICT_MVDCL(ent);
