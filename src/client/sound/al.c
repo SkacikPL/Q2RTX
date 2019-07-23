@@ -833,6 +833,9 @@ void AL_PlayChannel(channel_t *ch)
 	if (s_reverb->integer && cl.bsp && ReverbEffect != 0 && !sv_paused->integer)
 		qalSource3i(ch->srcnum, AL_AUXILIARY_SEND_FILTER, ReverbEffectSlot, 0, AL_FILTER_NULL);
 
+	if (cl.bsp && snd_is_underwater && underwaterFilter != 0 && !sv_paused->integer)
+		qalSourcei(ch->srcnum, AL_DIRECT_FILTER, underwaterFilter);
+
     AL_Spatialize(ch);
 
     // play it
@@ -1149,7 +1152,7 @@ void AL_Update(void)
 
 	oal_update_underwater();
 
-	if (cl.bsp && !snd_is_underwater && s_reverb_preset_autopick->integer && s_reverb->integer)
+	if (cl.bsp && !snd_is_underwater && s_reverb_preset_autopick->integer && s_reverb->integer) //
 		UpdateReverb();
 
 	if (s_voiceinput->integer && inputdevice)
