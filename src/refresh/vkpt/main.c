@@ -57,6 +57,7 @@ cvar_t *cvar_pt_accumulation_rendering_framenum = NULL;
 cvar_t *cvar_pt_projection = NULL;
 extern cvar_t *scr_viewsize;
 extern cvar_t *cvar_bloom_enable;
+extern cvar_t *cl_renderdemo;
 
 cvar_t *cvar_min_driver_version = NULL;
 
@@ -1817,6 +1818,87 @@ typedef struct reference_mode_s
 	float temporal_blend_factor;
 } reference_mode_t;
 
+void stbi_writex(void *context, void *data, int size)
+{
+	FS_Write(data, size, (qhandle_t)(size_t)context);
+}
+
+#define IMG_SAVE(x) \
+    static qerror_t IMG_Save##x(qhandle_t f, const char *filename, \
+        byte *pic, int width, int height, int row_stride, int param)
+
+IMG_SAVE(PNG)
+{
+	stbi_flip_vertically_on_write(1);
+	int ret = stbi_write_png_to_func(stbi_writex, (void*)(size_t)f, width, height, 3, pic, row_stride);
+
+	if (ret)
+		return Q_ERR_SUCCESS;
+
+	return Q_ERR_LIBRARY_ERROR;
+}
+
+static qhandle_t create_framedump(char *buffer, size_t size,
+	const char *name, const char *ext)
+{
+	qhandle_t f;
+	qerror_t ret;
+	int i;
+
+	if (name && *name) {
+		// save to user supplied name
+		return FS_EasyOpenFile(buffer, size, FS_MODE_WRITE,
+			"screenshots/", name, ext);
+	}
+
+	// find a file name to save it to
+	for (i = 0; i < 1000000; i++) {
+		Q_snprintf(buffer, size, "screenshots/%s_%03d%s", cls.demo.file_name, i, ext);
+		ret = FS_FOpenFile(buffer, &f, FS_MODE_WRITE | FS_FLAG_EXCL);
+		if (f) {
+			return f;
+		}
+		if (ret != Q_ERR_EXIST) {
+			Com_EPrintf("Couldn't exclusively open %s for writing: %s\n",
+				buffer, Q_ErrorString(ret));
+			return 0;
+		}
+	}
+
+	Com_EPrintf("Ran out of frame indexes!.\n");
+	return 0;
+}
+
+static qboolean make_framedump(const char *name, const char *ext,
+	qerror_t(*save)(qhandle_t, const char *, byte *, int, int, int, int),
+	int param)
+{
+	char        buffer[MAX_OSPATH];
+	byte        *pixels;
+	qerror_t    ret;
+	qhandle_t   f;
+	int         w, h, rowbytes;
+
+	f = create_framedump(buffer, sizeof(buffer), name, ext);
+	if (!f) {
+		return;
+	}
+
+	pixels = IMG_ReadPixels(&w, &h, &rowbytes);
+	ret = save(f, buffer, pixels, w, h, rowbytes, param);
+	FS_FreeTempMem(pixels);
+
+	FS_FCloseFile(f);
+
+	if (ret < 0) {
+		Com_EPrintf("Couldn't write %s: %s\n", buffer, Q_ErrorString(ret));
+		return qfalse;
+	}
+	else {
+		return qtrue;
+	}
+}
+
 static void
 evaluate_reference_mode(reference_mode_t* ref_mode)
 {
@@ -1838,21 +1920,49 @@ evaluate_reference_mode(reference_mode_t* ref_mode)
 			float percentage = powf(max(0.f, (num_accumulated_frames - num_warmup_frames) / (float)num_frames_to_accumulate), 0.5f);
 			if (percentage < 1.0f)
 			{
-				char text[MAX_QPATH];
-				Q_snprintf(text, sizeof(text), "Reference path tracing mode: accumulating samples... %d%%(%i)", (int)(min(1.f, percentage) * 100.f), num_accumulated_frames);
+				if (!cls.demo.playback)
+				{
+					char text[MAX_QPATH];
+					Q_snprintf(text, sizeof(text), "Reference path tracing mode: accumulating samples... %d%%(%i)", (int)(min(1.f, percentage) * 100.f), num_accumulated_frames);
 
-				int x = r_config.width / 4;
-				int y = r_config.height / 4 - 50;
-				R_SetScale(0.5f);
-				R_SetColor(0xff000000u);
-				SCR_DrawStringEx(x + 1, y + 1, UI_CENTER, MAX_QPATH, text, SCR_GetFont());
-				R_SetColor(~0u);
-				SCR_DrawStringEx(x, y, UI_CENTER, MAX_QPATH, text, SCR_GetFont());
-				R_SetAlphaScale(1.f);
+					int x = r_config.width / 4;
+					int y = r_config.height / 4 - 50;
+					R_SetScale(0.5f);
+					R_SetColor(0xff000000u);
+					SCR_DrawStringEx(x + 1, y + 1, UI_CENTER, MAX_QPATH, text, SCR_GetFont());
+					R_SetColor(~0u);
+					SCR_DrawStringEx(x, y, UI_CENTER, MAX_QPATH, text, SCR_GetFont());
+					R_SetAlphaScale(1.f);
+				}
 			}
 			else
+			{
 				SCR_SetHudAlpha(0.f);
-			break;
+
+				if (cl_renderdemo->integer)
+				{
+					qboolean result = make_framedump("", ".png", IMG_SavePNG, 0);
+
+					if (result)
+					{
+						Cvar_Set("cl_paused", "0");
+						CL_CheckForPause();
+
+						num_accumulated_frames = 0;
+
+						ref_mode->enable_accumulation = qfalse;
+						ref_mode->enable_denoiser = !!cvar_flt_enable->integer;
+						if (cvar_pt_num_bounce_rays->value == 0.5f)
+							ref_mode->num_bounce_rays = 0.5f;
+						else
+							ref_mode->num_bounce_rays = max(0, min(2, round(cvar_pt_num_bounce_rays->value)));
+						ref_mode->temporal_blend_factor = 0.f;
+					}
+					else
+						CL_Disconnect(ERR_DISCONNECT);
+				}
+				break;
+			}
 		}
 		case 2:
 			SCR_SetHudAlpha(0.f);
@@ -1939,6 +2049,7 @@ prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 	ubo->height = qvk.extent.height;
 	ubo->current_gpu_slice_width = qvk.gpu_slice_width;
 	ubo->water_normal_texture = water_normal_texture - r_images;
+	ubo->pt_swap_checkerboard = 0;
 
 	int camera_cluster_contents = viewleaf ? viewleaf->contents : 0;
 
@@ -1958,14 +2069,31 @@ prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 	UBO_CVAR_LIST
 #undef UBO_CVAR_DO
 
-	if (ref_mode->enable_accumulation)
-	{
-		// disable the stabilization hacks
-		ubo->pt_fake_roughness_threshold = 1.f;
-		ubo->pt_texture_lod_bias = -log2(sqrt(cvar_pt_accumulation_rendering_framenum->integer)); //Tiranasta
-		ubo->pt_specular_anti_flicker = 0.f;
-		ubo->pt_sun_bounce_range = 10000.f;
-	}
+		if (ref_mode->enable_accumulation || !ref_mode->enable_denoiser)
+			if (!ref_mode->enable_denoiser)
+			{
+				// disable the stabilization hacks
+				// disable fake specular because it is not supported without denoiser, and the result
+				// looks too dark with it missing
+				ubo->pt_fake_roughness_threshold = 1.f;
+				ubo->pt_texture_lod_bias = 0.f;
+				ubo->pt_specular_anti_flicker = 0.f;
+				ubo->pt_sun_bounce_range = 10000.f;
+
+				// swap the checkerboard fields every frame in reference mode to accumulate 
+				// swap the checkerboard fields every frame in reference or noisy mode to accumulate 
+				// both reflection and refraction in every pixel
+				ubo->pt_swap_checkerboard = (qvk.frame_counter & 1);
+
+				if (ref_mode->enable_accumulation)
+				{
+					ubo->pt_texture_lod_bias = -log2(sqrt(cvar_pt_accumulation_rendering_framenum->integer));
+
+					// disable the other stabilization hacks
+					ubo->pt_specular_anti_flicker = 0.f;
+					ubo->pt_sun_bounce_range = 10000.f;
+				}
+			}
 
 	ubo->temporal_blend_factor = ref_mode->temporal_blend_factor;
 	ubo->flt_enable = ref_mode->enable_denoiser;
@@ -2670,7 +2798,7 @@ IMG_ReadPixels_RTX(int *width, int *height, int *rowbytes)
 	}
 
 	vkUnmapMemory(qvk.device, qvk.screenshot_image_memory);
-
+	
 	*width = qvk.extent_unscaled.width;
 	*height = qvk.extent_unscaled.height;
 	*rowbytes = pitch;

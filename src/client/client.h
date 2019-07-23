@@ -477,6 +477,7 @@ typedef struct client_static_s {
         qboolean    paused;
         qboolean    seeking;
         qboolean    eof;
+		char		file_name[MAX_OSPATH];
     } demo;
 
 #if USE_CLIENT_GTV
