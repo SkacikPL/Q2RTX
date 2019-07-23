@@ -421,7 +421,7 @@ void InitGame (void)
 	bounce_bounce = gi.cvar("bounce_bounce", "0.5", 0);
 	bounce_minv   = gi.cvar("bounce_minv",   "60",  0);
 
-	sv_flaregun = gi.cvar("sv_flaregun", "2", 0);
+	sv_flaregun = gi.cvar("sv_flaregun", "1", 0);
 
 	// items
 	InitItems ();
