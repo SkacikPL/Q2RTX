@@ -323,8 +323,11 @@ static qerror_t parseMaterialsTable(char const * filename, pbr_materials_table_t
 
 	qerror_t status = validateMaterialsTable(table);
 
-	Com_Printf("Loaded '%s' (fast search = %s)\n", filename, table->alpha_sorted == qtrue ? "true" : "false");
-
+	if(table->alpha_sorted == qtrue)
+		Com_LPrintf(PRINT_TALK, "Loaded '%s' (fast search = %s)\n", filename, table->alpha_sorted == qtrue ? "true" : "false");
+	else
+		Com_WPrintf("Loaded '%s' (fast search = %s)\n", filename, table->alpha_sorted == qtrue ? "true" : "false");
+	
 	FS_FreeFile(buffer);
 
 	return status;

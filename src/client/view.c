@@ -544,7 +544,6 @@ static void cl_add_blend_changed(cvar_t *self)
 
 static void cl_flashlight_changed(cvar_t *self) //Have prompt and sound when toggled.
 {
-	
 	if (cl_flashlight->integer)
 	{
 		Com_Printf("Flashlight ON\n");

@@ -3714,6 +3714,7 @@ FS_Init
 void FS_Init(void)
 {
     //Com_Printf("------- FS_Init -------\n");
+	Com_LPrintf(PRINT_NOTICE, "\n");
 	Com_LPrintf(PRINT_NOTICE, "------- FS_Init -------\n");
 
     List_Init(&fs_hard_links);
