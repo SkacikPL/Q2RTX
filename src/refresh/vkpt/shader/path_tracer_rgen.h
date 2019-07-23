@@ -112,7 +112,7 @@ ivec2 get_image_position()
 	ivec2 pos;
 
 	bool is_even_checkerboard = push_constants.gpu_index == 0 || push_constants.gpu_index < 0 && gl_LaunchIDNV.z == 0;
-	if((global_ubo.current_frame_idx & 1) != 0)
+	if(global_ubo.pt_swap_checkerboard != 0)
 		is_even_checkerboard = !is_even_checkerboard;
 
 	if (is_even_checkerboard) {
@@ -177,7 +177,7 @@ float
 get_rng(uint idx)
 {
 	uvec3 p = uvec3(rng_seed, rng_seed >> 10, rng_seed >> 20);
-	p.z = (p.z * NUM_RNG_PER_FRAME + idx);
+	p.z = (p.z + idx);
 	p &= uvec3(BLUE_NOISE_RES - 1, BLUE_NOISE_RES - 1, NUM_BLUE_NOISE_TEX - 1);
 
 	return min(texelFetch(TEX_BLUE_NOISE, ivec3(p), 0).r, 0.9999999999999);
@@ -376,15 +376,7 @@ compute_direct_illumination_static(vec3 position, vec3 normal, vec3 geo_normal, 
 	if(pdf == 0)
 		return vec3(0);
 
-	vec3 L = pos_on_light - position;
-	L = normalize(L);
-
-	float NdotL = max(0, dot(normal, L));
-	float LdotNL = max(0, -dot(light_normal, L));
-
-	vec3 light_energy = light_color * (NdotL * sqrt(LdotNL));
-
-	return light_energy / pdf;
+	return light_color / pdf;
 }
 
 vec3
@@ -411,7 +403,7 @@ compute_direct_illumination_dynamic(vec3 position, vec3 normal, vec3 geo_normal,
     return light_color * float(global_ubo.num_lights);
 }
 
-vec3
+void
 get_direct_illumination(
 	vec3 position, 
 	vec3 normal, 
@@ -427,9 +419,11 @@ get_direct_illumination(
 	float direct_specular_weight, 
 	bool enable_static,
 	bool enable_dynamic,
-	out float specular)
+	out vec3 diffuse,
+	out vec3 specular)
 {
-	specular = 0;
+	diffuse = vec3(0);
+	specular = vec3(0);
 
 	vec3 pos_on_light_static;
 	vec3 pos_on_light_dynamic;
@@ -480,12 +474,21 @@ get_direct_illumination(
 #endif
 
 	if(null_light)
-		return vec3(0);
+		return;
+
+	diffuse = vis * contrib;
 
 	if(vis > 0 && direct_specular_weight > 0)
-		specular = GGX(view_direction, normalize(pos_on_light - position), normal, roughness, 0.0) * direct_specular_weight;
-	
-	return vis * contrib;
+	{
+		specular = diffuse * (GGX(view_direction, normalize(pos_on_light - position), normal, roughness, 0.0) * direct_specular_weight);
+	}
+
+	vec3 L = pos_on_light - position;
+	L = normalize(L);
+
+	float NdotL = max(0, dot(normal, L));
+
+	diffuse *= NdotL / M_PI;
 }
 
 void
@@ -543,11 +546,11 @@ get_sunlight(
 	
     vec3 envmap = textureLod(TEX_PHYSICAL_SKY, envmap_direction.xzy, 0).rgb;
 
-    diffuse = (NdotL * global_ubo.sun_solid_angle * global_ubo.pt_env_scale) * envmap;
+    diffuse = (global_ubo.sun_solid_angle * global_ubo.pt_env_scale) * envmap;
 #else
     // Fetch the average sun color from the resolved UBO - it's faster.
 
-    diffuse = NdotL * sun_color_ubo.sun_color;
+    diffuse = sun_color_ubo.sun_color;
 #endif
 
 #ifdef ENABLE_SHADOW_CAUSTICS
@@ -562,6 +565,8 @@ get_sunlight(
 		float NoH_offset = 0.5 * square(global_ubo.sun_tan_half_angle);
     	specular = diffuse * GGX(view_direction, global_ubo.sun_direction, normal, roughness, NoH_offset);
 	}
+
+	diffuse *= NdotL / M_PI;
 }
 
 vec3 clamp_output(vec3 c)

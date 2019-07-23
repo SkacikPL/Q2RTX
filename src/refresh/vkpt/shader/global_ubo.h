@@ -55,7 +55,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	UBO_CVAR_DO(flt_scale_spec, 1) \
 	UBO_CVAR_DO(flt_show_gradients, 0) /* switch for showing the gradient values as overlay image, 0 or 1 */ \
 	UBO_CVAR_DO(flt_taa, 1) /* switch for temporal AA, 0 or 1 */ \
-	UBO_CVAR_DO(flt_taa_variance, 1) /* temporal AA variance window scale, 0 means disable NCC */ \
+	UBO_CVAR_DO(flt_taa_anti_sparkle, 0.25) /* strength of the anti-sparkle filter of TAA, [0..1] */ \
+	UBO_CVAR_DO(flt_taa_variance, 0.7) /* temporal AA variance window scale, 0 means disable NCC, [0..inf) */ \
+	UBO_CVAR_DO(flt_taa_history_weight, 0.95) /* temporal AA weight of the history sample, [0..1) */ \
 	UBO_CVAR_DO(flt_temporal_hf, 1) /* temporal filter strength, [0..1] */ \
 	UBO_CVAR_DO(flt_temporal_lf, 1) \
 	UBO_CVAR_DO(flt_temporal_spec, 1) \
@@ -69,6 +71,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	UBO_CVAR_DO(pt_fake_roughness_threshold, 0.20) /* roughness value where the path tracer starts switching indirect light specular sampling from NDF based to SH based, [0..1] */ \
 	UBO_CVAR_DO(pt_indirect_polygon_lights, 1) /* switch for bounce lighting from local polygon lights, 0 or 1 */ \
 	UBO_CVAR_DO(pt_indirect_sphere_lights, 1) /* switch for bounce lighting from local sphere lights, 0 or 1 */ \
+	UBO_CVAR_DO(pt_max_log_sky_luminance, -3) /* maximum sky luminance, log2 scale, used for polygon light selection, (-inf..inf) */ \
 	UBO_CVAR_DO(pt_metallic_override, -1) /* overrides metallic parameter of all materials if non-negative, [0..1] */ \
 	UBO_CVAR_DO(pt_ndf_trim, 0.8) /* trim factor for GGX NDF sampling (0..1] */ \
 	UBO_CVAR_DO(pt_num_bounce_rays, 1) /* number of bounce rays, [1..inf) */ \
@@ -99,7 +102,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	UBO_CVAR_DO(tm_slope_blur_sigma, 12.0) /* sigma for Gaussian blur of tone curve slopes, (0..inf) */ \
 	UBO_CVAR_DO(tm_white_point, 10.0) /* how bright colors can be before they become white, (0..inf) */ \
 
-    
+
 #define GLOBAL_UBO_VAR_LIST \
 	GLOBAL_UBO_VAR_LIST_DO(int,             current_frame_idx) \
 	GLOBAL_UBO_VAR_LIST_DO(int,             width) \
@@ -143,7 +146,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	GLOBAL_UBO_VAR_LIST_DO(float,           pt_env_scale) \
 	GLOBAL_UBO_VAR_LIST_DO(float,           cylindrical_hfov) \
 	GLOBAL_UBO_VAR_LIST_DO(float,           cylindrical_hfov_prev) \
-	GLOBAL_UBO_VAR_LIST_DO(float,           padding3) \
+	GLOBAL_UBO_VAR_LIST_DO(int,             pt_swap_checkerboard) \
 	\
 	GLOBAL_UBO_VAR_LIST_DO(vec4,            dynamic_light_data[MAX_LIGHT_SOURCES * 2]) \
 	GLOBAL_UBO_VAR_LIST_DO(vec4,            cam_pos) \
