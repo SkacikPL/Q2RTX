@@ -16,6 +16,7 @@
  - Action Quake 2 support (courtesy of Quake 2 DOS: https://bitbucket.org/neozeed/q2dos/src/master/action/)
  - Light sources for laser beams (this can be disabled via cl_laserlights 0).
  - Option to disable obnoxious jumping "HUEH" via cl_jumpsound 0
+ - Demo prerendering feature via cl_renderdemo and cl_renderdemo_fps. Playing a demo with cl_renderdemo 1 will essentially "render" a sequence of accumulated frames (according to pt_accumulation_rendering_framenum cvar) at the framerate of cl_renderdemo_fps to your game/screenshots folder (eg baseq2/screenshots) with demoname_framenumber syntax. This sequence of images can then be imported to video editor of your choice to be compiled to a movie. To capture sound you need to do a separate run without demo rendering enabled whilst maintaining same target framerate (so RTX off is recommended and framerate lock via r_maxfps should be used) and record the audio with external software of your choice.
 
 
 
