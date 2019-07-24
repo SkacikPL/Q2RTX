@@ -94,9 +94,9 @@ Returns a pointer to the structure with all entry points
 and global variables
 =================
 */
-#define q_exported          __declspec(dllexport)
 
-q_exported game_export_t *GetGameAPI (game_import_t *import)
+game_export_t *
+GetGameAPI (game_import_t *import)
 {
 	gi = *import;
 	globals.apiversion = GAME_API_VERSION;
